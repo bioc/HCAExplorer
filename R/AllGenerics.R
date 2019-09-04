@@ -1,0 +1,23 @@
+setGeneric("getBundlesCheckout", function(hca, ...) standardGeneric("getBundlesCheckout"))
+setGeneric("deleteBundle", function(hca, ...) standardGeneric("deleteBundle"))
+setGeneric("getBundle", function(hca, ...) standardGeneric("getBundle"))
+setGeneric("putBundle", function(hca, ...) standardGeneric("putBundle"))
+setGeneric("postBundle", function(hca, ...) standardGeneric("postBundle"))
+setGeneric("postBundlesCheckout", function(hca, ...) standardGeneric("postBundlesCheckout"))
+setGeneric("putCollection", function(hca, ...) standardGeneric("putCollection"))
+setGeneric("deleteCollection", function(hca, ...) standardGeneric("deleteCollection"))
+setGeneric("getCollection", function(hca, ...) standardGeneric("getCollection"))
+setGeneric("patchCollection", function(hca, ...) standardGeneric("patchCollection"))
+setGeneric("getFile", function(hca, ...) standardGeneric("getFile"))
+setGeneric("headFile", function(hca, ...) standardGeneric("headFile"))
+setGeneric("putFile", function(hca, ...) standardGeneric("putFile"))
+setGeneric("postSearch", function(hca, ...) standardGeneric("postSearch"))
+setGeneric("getSubscriptions", function(hca, ...) standardGeneric("getSubscriptions"))
+setGeneric("putSubscription", function(hca, ...) standardGeneric("putSubscription"))
+setGeneric("deleteSubscription", function(hca, ...) standardGeneric("deleteSubscription"))
+setGeneric("getSubscription", function(hca, ...) standardGeneric("getSubscription"))
+
+#' @export
+setGeneric("nextResults", function(result, ...) standardGeneric("nextResults"))
+
+setGeneric("fields", function(hca, ...) standardGeneric("fields"))
