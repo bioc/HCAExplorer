@@ -19,20 +19,20 @@
     names(hca@terms)
 }
 
-#' List supported fields of an ProjectBrowser object
+#' List supported fields of an HCAExplorer object
 #'
 #' @return A tibble indicating fields that can be queried upon.
 #'
 #' @name fields
-#' @aliases fields,ProjectBrowser-method
+#' @aliases fields,HCAExplorer-method
 #' @docType methods
 #'
 #' @examples
-#' hca <- ProjectBrowser()
+#' hca <- HCAExplorer()
 #' hca %>% fields
 #'
 #' @export
-setMethod("fields", "ProjectBrowser", .project_fields)
+setMethod("fields", "HCAExplorer", .project_fields)
 
 .project_values <- function(x, fields)
 {
@@ -47,22 +47,22 @@ setMethod("fields", "ProjectBrowser", .project_fields)
     as_tibble(uu)
 }
 
-#' List all values for certain fields in a ProjectBrowser Object
+#' List all values for certain fields in a HCAExplorer Object
 #'
-#' @param x A ProjectBrowser Object.
+#' @param x A HCAExplorer Object.
 #' @param fields a character vector of fields to display avaiable values for.
 #' @param ... Other arguments.
 #'
 #' @return a list of possible values for a filter
 #'
 #' @examples
-#' hca <- ProjectBrowser()
+#' hca <- HCAExplorer()
 #' vals <- hca %>% values('organ')
 #' vals
 #'
 #' @importFrom S4Vectors values
 #' @export
-setMethod("values", "ProjectBrowser", .project_values)
+setMethod("values", "HCAExplorer", .project_values)
 
 .binary_op_project <- function(sep)
 {
@@ -106,7 +106,7 @@ setMethod("values", "ProjectBrowser", .project_values)
 
 #' @importFrom curl curl_escape
 #' @export
-filter.ProjectBrowser <- function(.data, ..., .preserve)
+filter.HCAExplorer <- function(.data, ..., .preserve)
 {
     dots = quos(...)
     if (length(dots) == 0) {

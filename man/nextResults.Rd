@@ -3,20 +3,20 @@
 \docType{methods}
 \name{nextResults}
 \alias{nextResults}
-\alias{nextResults,ProjectBrowser-method}
+\alias{nextResults,HCAExplorer-method}
 \title{Next Results}
 \usage{
-\S4method{nextResults}{ProjectBrowser}(result)
+\S4method{nextResults}{HCAExplorer}(result)
 }
 \value{
-A ProjectBrowser object that displays the next results
+A HCAExplorer object that displays the next results
 }
 \description{
-Fetch the next set of bundles from a ProjectBrowser Object
+Fetch the next set of bundles from a HCAExplorer Object
 }
 \examples{
 
-hca <- ProjectBrowser()
+hca <- HCAExplorer()
 hca <- nextResults(hca)
 hca
 

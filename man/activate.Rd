@@ -3,12 +3,12 @@
 \docType{methods}
 \name{activate}
 \alias{activate}
-\alias{activate,ProjectBrowser-method}
-\title{Activate projects, samples, or files to display in the ProjectBrowser Object}
+\alias{activate,HCAExplorer-method}
+\title{Activate projects, samples, or files to display in the HCAExplorer Object}
 \usage{
-\S4method{activate}{ProjectBrowser}(hca, what = c("projects", "samples",
+\S4method{activate}{HCAExplorer}(hca, what = c("projects", "samples",
   "files"))
 }
 \description{
-Activate projects, samples, or files to display in the ProjectBrowser Object
+Activate projects, samples, or files to display in the HCAExplorer Object
 }

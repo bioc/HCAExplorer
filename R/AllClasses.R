@@ -1,21 +1,9 @@
 
-.init_ProjectBrowser <- function(project)
+.init_HCAExplorer <- function(project)
 {
     res <- filter(project)
     res
 }
-
-#' @importFrom tibble tibble
-#' @importFrom dplyr %>%
-setOldClass('tbl_df')
-.SearchResult <- setClass("SearchResult",
-    slots = c(
-        first_hit = 'integer',
-        last_hit = 'integer',
-        results = 'list',
-        link = 'character'
-    )
-)
 
 setOldClass('quosure')
 setOldClass('quosures')
@@ -29,8 +17,8 @@ setOldClass('quosures')
 #'
 #' @author Daniel Van Twisk
 #'
-#' @exportClass ProjectBrowser
-.ProjectBrowser <- setClass("ProjectBrowser",
+#' @exportClass HCAExplorer
+.HCAExplorer <- setClass("HCAExplorer",
     slots = c(
         url = "character",
         results = "tbl_df",
@@ -56,35 +44,24 @@ setOldClass('quosures')
 #'
 #' @author Daniel Van Twisk
 #'
-#' @return a ProjectBrowser object
+#' @return a HCAExplorer object
 #'
 #' @examples
-#' pb <- ProjectBrowser()
+#' pb <- HCAExplorer()
 #' pb
 #' @export
-ProjectBrowser <-
+HCAExplorer <-
     function(url='https://service.explore.data.humancellatlas.org/repository/projects',
              per_page = 15)
 {
-    project <- .ProjectBrowser(url=url, per_page = per_page, results=tibble(),
+    project <- .HCAExplorer(url=url, per_page = per_page, results=tibble(),
                                es_query = quos(), es_source=quos(), activated = 'projects')
-    .init_ProjectBrowser(project)
+    .init_HCAExplorer(project)
 }
              
-
-.first_hit <- function(object) object@first_hit
-.last_hit <- function(object) object@last_hit
-.total_hits <- function(object) object@total_hits
-.es_query <- function(object) object@es_query
 .priv_results <- function(object) object@results
-.link <- function(object) object@link
 
-setGeneric('first_hit', function(object, ...) standardGeneric('first_hit'))
-setGeneric('last_hit', function(object, ...) standardGeneric('last_hit'))
-setGeneric('total_hits', function(object, ...) standardGeneric('total_hits'))
-setGeneric('es_query', function(object, ...) standardGeneric('es_query'))
 setGeneric('results', function(object, ...) standardGeneric('results'))
-setGeneric('link', function(object, ...) standardGeneric('link'))
 
 .retrieve_results <-
     function(object)
@@ -107,7 +84,7 @@ setGeneric('link', function(object, ...) standardGeneric('link'))
     select(res, sel)
 }
 
-#' Obtain search results from a ProjectBrowser Object
+#' Obtain search results from a HCAExplorer Object
 #'
 #' @description
 #'  Returns a tibble either showing bundles or files based on whichever is
@@ -116,27 +93,12 @@ setGeneric('link', function(object, ...) standardGeneric('link'))
 #' @return a tibble
 #'
 #' @name results
-#' @aliases results,ProjectBrowser-method
+#' @aliases results,HCAExplorer-method
 #' @docType methods
 #'
 #' @export
 #' @importFrom dplyr distinct
-setMethod('results', 'ProjectBrowser', .project_results)
-
-setMethod('first_hit', 'SearchResult', .first_hit)
-setMethod('last_hit', 'SearchResult', .last_hit)
-setMethod('total_hits', 'SearchResult', .total_hits)
-setMethod('es_query', 'SearchResult', .es_query)
-
-#' Get results of SearchResult object
-#'
-#' @param object A Searchresult to obtain the result slot value from
-#'
-#' @return tibble of the results of the HCABrowser query
-#'
-#' @export
-setMethod('results', 'SearchResult', .priv_results)
-setMethod('link', 'SearchResult', .link)
+setMethod('results', 'HCAExplorer', .project_results)
 
 #' @export
 setGeneric('undoEsQuery', function(hca, ...) standardGeneric('undoEsQuery'))
@@ -147,7 +109,6 @@ setGeneric('per_page', function(hca, ...) standardGeneric('per_page'))
 setGeneric('pullBundles', function(hca, ...) standardGeneric('pullBundles'))
 setGeneric('pullFiles', function(hca, ...) standardGeneric('pullFiles'))
 setGeneric('showBundles', function(hca, bundle_fqids, ...) standardGeneric('showBundles'))
-setGeneric('downloadHCA', function(hca, ...) standardGeneric('downloadHCA'))
 setGeneric('activate', function(hca, ...) standardGeneric('activate'))
 setGeneric('getProjects', function(hca, ...) standardGeneric('getProjects'))
 setGeneric('showProject', function(hca, ...) standardGeneric('showProject'))
@@ -165,15 +126,13 @@ setGeneric('pullProject', function(hca, ...) standardGeneric('pullProject'))
 .showProject <-
     function(hca, project)
 {
+    browser()
     res <- hca@results
-#i    if (is.character(project))
-#        res[, "projects.projectTitle"
-    res <- as.data.frame(res[project, ])
-    pt <- as.character(res[, "projects.projectTitle"])
-    hca <- HCABrowser()
-    hca <- hca %>% filter(project_title == pt)
-    hca <- hca %>% select(c('project_description', 'publication.authors', 'publication.publication_title'))
-    hca <- as.data.frame(hca@results@results)[1,]
+    entryId <- as.character(res[['entryId']][[project]])
+    url <- paste0(hca@url, '/', entryId)
+    res <- httr::GET(url)
+    res <- httr::content(res)
+    
     cat('\nProject Title\t', as.character(res[,"projects.projectTitle"]), '\n')
     cat('\n')
     cat('Project Details\n')
@@ -197,7 +156,7 @@ setGeneric('pullProject', function(hca, ...) standardGeneric('pullProject'))
     
 }
 
-setMethod('showProject', 'ProjectBrowser', .showProject)
+setMethod('showProject', 'HCAExplorer', .showProject)
 
 .pullProject_project <- function(hca, project, n)
 {
@@ -207,9 +166,9 @@ setMethod('showProject', 'ProjectBrowser', .showProject)
     hh %>% filter("project_title" == pj) %>% pullBundles(n)
 }
 
-setMethod('pullProject', 'ProjectBrowser', .pullProject_project)
+setMethod('pullProject', 'HCAExplorer', .pullProject_project)
 
-.activate.ProjectBrowser <-
+.activate.HCAExplorer <-
     function(hca, what = c('projects', 'samples', 'files'))
 {
     type <- match.arg(what)
@@ -228,15 +187,15 @@ setMethod('pullProject', 'ProjectBrowser', .pullProject_project)
     filter(hca)
 }
 
-#' Activate projects, samples, or files to display in the ProjectBrowser Object
+#' Activate projects, samples, or files to display in the HCAExplorer Object
 #'
 #' @name activate
-#' @aliases activate,ProjectBrowser-method
+#' @aliases activate,HCAExplorer-method
 #' @docType methods
 #'
 #' @importFrom tidygraph activate
 #' @export
-setMethod('activate', 'ProjectBrowser', .activate.ProjectBrowser)
+setMethod('activate', 'HCAExplorer', .activate.HCAExplorer)
 
 .undo_esquery <-
     function(hca, n = 1L)
@@ -252,7 +211,7 @@ setMethod('activate', 'ProjectBrowser', .activate.ProjectBrowser)
     }
 }
 
-.show_ProjectBrowser <- function(object)
+.show_HCAExplorer <- function(object)
 {
     cat('class:', class(object), '\n')
     cat('Using azul backend at:\n ', object@url, '\n\n')
@@ -260,12 +219,12 @@ setMethod('activate', 'ProjectBrowser', .activate.ProjectBrowser)
     print(results(object))
 }
 
-#' Show ProjectBrowser
+#' Show HCAExplorer
 #'
-#' @param object a ProjectBrowser object to show
+#' @param object a HCAExplorer object to show
 #'
 #' @return outputs a text represntation of the object
 #'
 #' @importFrom methods show
 #' @export
-setMethod('show', 'ProjectBrowser', .show_ProjectBrowser)
+setMethod('show', 'HCAExplorer', .show_HCAExplorer)

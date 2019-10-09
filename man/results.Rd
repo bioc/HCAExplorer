@@ -3,10 +3,10 @@
 \docType{methods}
 \name{results}
 \alias{results}
-\alias{results,ProjectBrowser-method}
-\title{Obtain search results from a ProjectBrowser Object}
+\alias{results,HCAExplorer-method}
+\title{Obtain search results from a HCAExplorer Object}
 \usage{
-\S4method{results}{ProjectBrowser}(object)
+\S4method{results}{HCAExplorer}(object)
 }
 \value{
 a tibble

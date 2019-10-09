@@ -3,19 +3,19 @@
 \docType{methods}
 \name{fields}
 \alias{fields}
-\alias{fields,ProjectBrowser-method}
-\title{List supported fields of an ProjectBrowser object}
+\alias{fields,HCAExplorer-method}
+\title{List supported fields of an HCAExplorer object}
 \usage{
-\S4method{fields}{ProjectBrowser}(hca)
+\S4method{fields}{HCAExplorer}(hca)
 }
 \value{
 A tibble indicating fields that can be queried upon.
 }
 \description{
-List supported fields of an ProjectBrowser object
+List supported fields of an HCAExplorer object
 }
 \examples{
-hca <- ProjectBrowser()
+hca <- HCAExplorer()
 hca \%>\% fields
 
 }

@@ -1,4 +1,4 @@
-## functions to build requests to HCA azul backend for ProjectBrowser class
+## functions to build requests to HCA azul backend for HCAExplorer class
 
 
 
@@ -18,7 +18,7 @@ projectGet <- function(project, filter, per_page=15)
     project
 }
 
-.nextResults_ProjectBrowser <- function(result)
+.nextResults_HCAExplorer <- function(result)
 {
     url <- result@url
     url <- paste0(url, '?', result@current_filter, '&size=', result@per_page,
@@ -31,21 +31,21 @@ projectGet <- function(project, filter, per_page=15)
 
 #' Next Results
 #'
-#' Fetch the next set of bundles from a ProjectBrowser Object
+#' Fetch the next set of bundles from a HCAExplorer Object
 #'
-#' @return A ProjectBrowser object that displays the next results
+#' @return A HCAExplorer object that displays the next results
 #'
 #' @author Daniel Van Twisk
 #'
 #' @name nextResults
-#' @aliases nextResults,ProjectBrowser-method
+#' @aliases nextResults,HCAExplorer-method
 #' @docType methods
 #' 
 #' @examples
 #'
-#' hca <- ProjectBrowser()
+#' hca <- HCAExplorer()
 #' hca <- nextResults(hca)
 #' hca
 #'
 #' @export
-setMethod("nextResults", "ProjectBrowser", .nextResults_ProjectBrowser)
+setMethod("nextResults", "HCAExplorer", .nextResults_HCAExplorer)
