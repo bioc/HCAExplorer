@@ -69,7 +69,15 @@ setMethod("values", "HCAExplorer", .project_values)
     force(sep)
     function(e1, e2) {
         field <- as.character(substitute(e1))
-        value <- as.character(substitute(e2))
+        value <- try({
+            e2
+        }, silent = TRUE)
+        if (inherits(value, "try-error")) {
+            value <- as.character(substitute(e2))
+            if(value[1] == 'c')
+                value <- value[-1]
+            value
+        }
         
         fun <- "is"
 
@@ -94,14 +102,18 @@ setMethod("values", "HCAExplorer", .project_values)
 
 .project_filter_loop <- function(li, expr)
 {
+    browser()
     res <- rlang::eval_tidy(expr, data = .LOG_OP_REG_PROJECT)
     res
 }
 
-.project_temp <- function(dots)
+.summary_filter2 <- function(.data, ...)
 {
-    res <- Reduce(.project_filter_loop, dots, init = list())
-    res
+    dots <- quos(...)
+    project <- .data
+    browser()
+    search_term <- Reduce(.project_filter_loop, es_query, init = list())
+    paste0('filters=', curl::curl_escape(jsonlite::toJSON(search_term)))
 }
 
 #' @importFrom curl curl_escape
@@ -111,17 +123,18 @@ filter.HCAExplorer <- function(.data, ..., .preserve)
     dots = quos(...)
     if (length(dots) == 0) {
         project <- .data
-        ret <- paste0('filter=', curl::curl_escape('{}'))
+        ret <- paste0('filters=', curl::curl_escape('{}'))
         project@current_filter <- ret
         projectGet(project, ret)
     }
     else {
+    browser()
         project <- .data
         es_query <- c(project@es_query, dots)
         search_term <- Reduce(.project_filter_loop, es_query, init = list())
+        ret <- paste0('filters=', curl::curl_escape(jsonlite::toJSON(search_term)))
         project@es_query <- es_query
         project@search_term <- search_term
-        ret <- paste0('filters=', curl::curl_escape(jsonlite::toJSON(search_term)))
         project@current_filter <- ret
         projectGet(project, ret)
     }

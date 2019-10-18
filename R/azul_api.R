@@ -10,9 +10,10 @@
 
 projectGet <- function(project, filter, per_page=15)
 {
+    browser()
     url <- project@url
     project@per_page=per_page
-    url <- paste0(url, '?', filter, '&size=', per_page, '&sort=projectTitle&order=asc')
+    url <- paste0(url, '/projects?', filter, '&size=', per_page, '&sort=projectTitle&order=asc')
     res <- httr::GET(url)
     project <- .project_content(project, res)
     project
@@ -21,7 +22,7 @@ projectGet <- function(project, filter, per_page=15)
 .nextResults_HCAExplorer <- function(result)
 {
     url <- result@url
-    url <- paste0(url, '?', result@current_filter, '&size=', result@per_page,
+    url <- paste0(url, '/projects?', result@current_filter, '&size=', result@per_page,
         '&sort=projectTitle&order=asc&search_after=', result@search_after,
         '&search_after_uid=', result@search_after_uid)
     res <- httr::GET(url)

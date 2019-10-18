@@ -29,6 +29,7 @@ setOldClass('quosures')
         per_page = "numeric",
         current_filter = "character",
         terms = "list",
+        selections = "numeric",
         search_after = "character",
         search_after_uid = "character"
     )
@@ -51,11 +52,12 @@ setOldClass('quosures')
 #' pb
 #' @export
 HCAExplorer <-
-    function(url='https://service.explore.data.humancellatlas.org/repository/projects',
+    function(url='https://service.explore.data.humancellatlas.org/repository',
              per_page = 15)
 {
-    project <- .HCAExplorer(url=url, per_page = per_page, results=tibble(),
-                               es_query = quos(), es_source=quos(), activated = 'projects')
+    project <- .HCAExplorer(url=url, per_page = per_page, results = tibble(),
+                               es_query = quos(), es_source = quos(),
+                               activated = 'projects', terms = list())
     .init_HCAExplorer(project)
 }
              
@@ -81,7 +83,12 @@ setGeneric('results', function(object, ...) standardGeneric('results'))
         sel <- c('samples.id', 'projects.projectTitle', 'samples.sampleEntityType', 'samples.organ', 'samples.organPart', 'cellSuspensions.selectedCellType', 'protocols.libraryConstructionApproach', 'protocols.pairedEnd', 'donorOrganisms.genusSpecies', 'donorOrganisms.organismAge', 'donorOrganisms.biologicalSex', 'samples.disease')
     if(object@activated == "files")
         sel <- c('samples.id', 'samples.sampleEntityType', 'samples.organ', 'samples.organPart', 'cellSuspensions.selectCellType', 'protocols.libraryConstructionApproach', 'protocols.pairedEnd', 'donorOrganisms.genusSpecies', 'donorOrganisms.organismAge', 'donorOrganism.biologicalSex', 'samples.disease')
-    select(res, sel)
+    hca <- select(res, sel)
+
+    selections <- object@selections
+    if (length(selections) > 0)
+        hca <- hca[selections,]
+    hca
 }
 
 #' Obtain search results from a HCAExplorer Object
@@ -114,22 +121,35 @@ setGeneric('getProjects', function(hca, ...) standardGeneric('getProjects'))
 setGeneric('showProject', function(hca, ...) standardGeneric('showProject'))
 setGeneric('pullProject', function(hca, ...) standardGeneric('pullProject'))
 
-.project_selections <-
-    c('project_json.project_core.project_title',
-      'project_json.project_core.project_short_name',
-      'specimen_from_organism_json.organ.text',
-      'library_preparation_protocol.library_construction_approach.text',
-      'specimen_from_organism_json.genus_species.text',
-      'disease.text'
-    )
+setGeneric('getManifest', function(hca, ...) standardGeneric('getManifest'))
+setGeneric('getManifestFileFormats', function(hca, ...) standardGeneric('getManifestFileFormats'))
+
+select.HCAExplorer <- function(.data, ..., projects)
+{
+    hca <- .data
+    if (is.numeric(projects))
+        hca@selections <- projects
+    else {
+        res <- hca@results
+        row <- which(res[['projects.projectTitle']] == projects)
+        hca@selections <- row
+    }
+    hca
+        
+}
+
+undoSelect <- function(hca)
+{
+    hca@selections <- numeric()
+    hca
+}
 
 .showProject <-
-    function(hca, project)
+    function(hca, projects)
 {
-    browser()
     res <- hca@results
     entryId <- as.character(res[['entryId']][[project]])
-    url <- paste0(hca@url, '/', entryId)
+    url <- paste0(hca@url, '/projects/', entryId)
     res <- httr::GET(url)
     res <- httr::content(res)
     
@@ -153,20 +173,39 @@ setGeneric('pullProject', function(hca, ...) standardGeneric('pullProject'))
 
 #    cat('Publications\t\t', as.character(hca[,'publication.publication_title']), "\n")
     cat('Laboratory\t\t\t', as.character(res[,'projects.laboratory']), "\n")
-    
 }
 
 setMethod('showProject', 'HCAExplorer', .showProject)
 
-.pullProject_project <- function(hca, project, n)
+.summary_filter <- function(.data, ...)
 {
-    hca <- as.data.frame(hca@results[project,])
-    pj <- as.character(hca[,"projects.projectTitle"])
-    hh <- HCABrowser()
-    hh %>% filter("project_title" == pj) %>% pullBundles(n)
+    browser()
+    dots <- quos(...)
+    project <- .data
+    search_term <- Reduce(.project_filter_loop, dots, init = list())
+    paste0('filters=', curl::curl_escape(jsonlite::toJSON(search_term)))
 }
 
-setMethod('pullProject', 'HCAExplorer', .pullProject_project)
+.getManifestFormats <- function(hca)
+{
+    url <- hca@url
+    selections <- hca@selections
+    res <- hca@results
+    res <- res[selections,]
+    ids <- res$entryId
+    browser()
+    query <- .summary_filter(hca, projectId == ids)
+    url <- paste0(url, '/summary?', query)
+    res <- httr::GET(url) 
+    res <- httr::content(res)
+    res <- as.data.frame(do.call(rbind, res$fileTypeSummaries))
+    res$fileType
+}
+
+.getManifest <- function(hca, fileFormat)
+{
+    
+}
 
 .activate.HCAExplorer <-
     function(hca, what = c('projects', 'samples', 'files'))
@@ -215,7 +254,7 @@ setMethod('activate', 'HCAExplorer', .activate.HCAExplorer)
 {
     cat('class:', class(object), '\n')
     cat('Using azul backend at:\n ', object@url, '\n\n')
-    cat('Showing', object@activated, 'with', object@per_page ,'results per page\n')
+    cat('Showing', object@activated, 'with', object@per_page ,'results per page and', length(object@selections), "selections\n")
     print(results(object))
 }
 

@@ -15,6 +15,7 @@
 #        df
         df
     })
+    browser()
     project@terms <- results[['termFacets']]
     upfront <- do.call(rbind.fill, upfront)
     project@results <- as_tibble(upfront)
