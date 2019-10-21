@@ -102,7 +102,6 @@ setMethod("values", "HCAExplorer", .project_values)
 
 .project_filter_loop <- function(li, expr)
 {
-    browser()
     res <- rlang::eval_tidy(expr, data = .LOG_OP_REG_PROJECT)
     res
 }
@@ -111,7 +110,6 @@ setMethod("values", "HCAExplorer", .project_values)
 {
     dots <- quos(...)
     project <- .data
-    browser()
     search_term <- Reduce(.project_filter_loop, es_query, init = list())
     paste0('filters=', curl::curl_escape(jsonlite::toJSON(search_term)))
 }
@@ -128,10 +126,11 @@ filter.HCAExplorer <- function(.data, ..., .preserve)
         projectGet(project, ret)
     }
     else {
-    browser()
         project <- .data
         es_query <- c(project@es_query, dots)
         search_term <- Reduce(.project_filter_loop, es_query, init = list())
+        if (length(search_term) > 1)
+            search_term <- unlist(search_term, recursive = FALSE)
         ret <- paste0('filters=', curl::curl_escape(jsonlite::toJSON(search_term)))
         project@es_query <- es_query
         project@search_term <- search_term

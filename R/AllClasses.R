@@ -179,10 +179,11 @@ setMethod('showProject', 'HCAExplorer', .showProject)
 
 .summary_filter <- function(.data, ...)
 {
-    browser()
     dots <- quos(...)
     project <- .data
     search_term <- Reduce(.project_filter_loop, dots, init = list())
+    if (length(search_term) > 1)
+        search_term <- unlist(search_term, recursive = FALSE)
     paste0('filters=', curl::curl_escape(jsonlite::toJSON(search_term)))
 }
 
@@ -193,7 +194,6 @@ setMethod('showProject', 'HCAExplorer', .showProject)
     res <- hca@results
     res <- res[selections,]
     ids <- res$entryId
-    browser()
     query <- .summary_filter(hca, projectId == ids)
     url <- paste0(url, '/summary?', query)
     res <- httr::GET(url) 
