@@ -1,5 +1,5 @@
 ---
-title: "The HCABrowser Package"
+title: "The HCAExplorer Package"
 author: "Daniel Van Twisk"
 date: "`r format(Sys.Date(), '%A, %B %d, %Y')`"
 always_allow_html: yes
@@ -11,16 +11,16 @@ abstract: >
   The [Human Cell Atlas] (HCA) (https://www.humancellatlas.org/) was created in
   order to create comprehensive reference maps of all human cells as a basis for
   both understanding human health and diagnosing, monitoring, and treating
-  disease. The *HCABrowser* Biocondctor pacakge provides infrastructure for
+  disease. The *HCAExplorer* Biocondctor pacakge provides infrastructure for
   searching for, queerying, and accessing data help on the Human Cell Atlas's
   Data Coordination Platform (https://dss.data.humancellatlas.org/). Further
   changes to the package are planned to incorperate higer level functionality to
   upload user generated data to the the Human Cell Atlas platform.
 vignette: >
-  %\VignetteIndexEntry{Introduction to Accessing the HCABrowser using the
-        HCABrowser package}
+  %\VignetteIndexEntry{Introduction to Accessing the HCAExplorer using the
+        HCAExplorer package}
   %\VignetteEngine{knitr::knitr}
-  %\VignetteIndexEntry{HCABrowser}
+  %\VignetteIndexEntry{HCAExplorer}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -69,50 +69,49 @@ To install this package, use Bioconductor's `BiocManager` package.
 ```{r install_bioc, eval=FALSE}
 if (!require("BiocManager"))
     install.packages("BiocManager")
-BiocManager::install('HCABrowser')
+BiocManager::install('HCAExplorer')
 ```
 
 ```{r libraries, message=FALSE}
-library(HCABrowser)
+library(HCAExplorer)
 ```
 
 ## Connecting to the Human Cell Atlas
 
-The `r Biocpkg("HCABrowser")` package relies on having network
-connectivety. Also, the HCA's Data Coordination Platform (DCP) must
-also be operational.
+The `r Biocpkg("HCAExplorer")` package relies on having network
+connectivety. Also, the a link to a viable digest of the Human Cell Atlas must
+also be operational. The backend that we are using will be using is refered to
+as the "azul backend". This package is meant to mirror the functionality of the
+[HCA Data Explorer](https://data.humancellatlas.org/explore/projects).
 
-The `HCABrowser` object serves as the representation of the Human Cell
-Atlas. Upon creation, it will automatically peform a cursorary query and
-display a small table showing the first few bundles of the entire HCA. This
+The `HCAExplorer` object serves as the representation of the Human Cell
+Atlas. Upon creation, it will automatically perform a cursorary query and
+display a small table showing the first few project of the entire HCA. This
 intial table contains some columns that we have determined are most useful
-to users. The output also displays the url of the instance of the HCA DCP being
-used, the current query, whether bundles or files are being displayed, and the
-number of bundles in the results
+to users. The output also displays the url of the instance of the HCA digest
+being used, the current query, relevant information about the quantity of data
+being displayed, and finally the table of projects.
 
-By default, ten bundles per page will be displayed in the result and the
-default url to the HCA DCP will be used. Currently, the maximum number of
-bundles that can be shown per query is ten. These two values can be changed in
-the constructor.
+By default, 15 bundles per page will be displayed in the result and the
+default url to the HCA DCP will be used. These two values can be changed in
+the constructor or later on using methods.
 
 If the HCA cannot be reached, an error will be thrown displaying the status of
 the request.
 
 ```{r createHCA}
-hca <- HCABrowser(url = 'https://dss.data.humancellatlas.org/v1', per_page = 10)
+hca <- HCAExplorer(url = 'https://service.explore.data.humancellatlas.org', per_page = 15)
 hca
 ```
 
 Upon displaying the object, multiple fields can be seen:
-- The class: `HCABrowser`
-- The hca dcp address that is currently being used.
-- The current query (assigned using `filter()`)
-- The current selection (assigned using `select()`)
-    - You may notice that some columns are already selected. These columns are
-      automatically selected to allow the user some initial view of the hca.
-- The bundles being shown and whether a `link` to more results is availiable
-- The number of bundles or files being shown per_page
-- The results `tibble` of the query
+- The class: `HCAExplorer`
+- The azul-backend address that is currently being used.
+- The current query.
+- The projects being shown and whether a `link` to more results is availiable.
+- The number of projects being shown per_page.
+- The results `tibble` of the query. (This table is abbreviated to show only
+  columns that we determined are most useful to the user.)
 
 The results `tibble` can be obtained using the `results()` method.
 
@@ -120,32 +119,23 @@ The results `tibble` can be obtained using the `results()` method.
 results(hca)
 ```
 
-To toggle whether bundles or files are being displayed in the `tibble`, the
-`activate()` method can be used to choose which to display.
+To toggle whether prjects, samples, or file are being displayed in the `tibble`,
+the `activate()` method can be used to choose which to display.
 
 ```{r activate}
 ## Bundles are diaplyed be default
 nrow(results(hca))
 
-## The HCABrowser object is activated here by 'files'
-hca <- hca %>% activate('files')
+## The HCAExplorer object is activated here by 'files'
+hca <- hca %>% activate('samples')
 hca
 nrow(results(hca))
 
 ## Revert back to showing bundles with 'bundles'
-hca <- hca %>% activate('bundles')
+hca <- hca %>% activate('projects')
 ```
 
-To change how many pages are being displayed, the `per_page()` method can be
-used.
-(Note the hca dcp had a maximum of 10 bundles per page to be shown at a time)
-
-```{r per_page}
-#hca2 <- hca %>% per_page(n = 5)
-#hca2
-```
-
-Since there are far more bundles in the HCA than can be shown, if `link` is
+Since there are more projects in the HCA than can be shown, if `link` is
 `True`, the next set of bundles can be obtained using the `nextResults` method.
 
 ```{r nextResults}
@@ -153,12 +143,18 @@ hca <- nextResults(hca)
 hca
 ```
 
-## Querying the HCABrowser
+# A working example: Obtaining Metadata files from the HCAExplorer
+
+One of the primary tasks of the HCAExplorer is to obtain metadata files of
+projects and then pass them down to other pipelines to download useful
+information like expression matrices.
+
+## Querying the HCAExplorer
 
 To show which fields are available to query, use the `supportedFilters()` method.
 
 ```{r fields}
-hca <- HCABrowser()
+hca <- HCAExplorer()
 hca %>% fields
 ```
 
@@ -171,38 +167,19 @@ If the parameter `fields` is specified, it will display values related to those
 field. If not specified, the values for all fields will be shown.
 
 ```{r valuess}
-hca %>% values(c('organ.text', 'library_construction_approach.text'))
+hca %>% values(c('organ'))
 ```
 
-The HCA extends the functionality of the `r CRANpkg("dplyr")` package's `filter()`
+HCAExplorer extends the functionality of the `r CRANpkg("dplyr")` package's `filter()`
 and `select()` methods.
 
 The `filter()` method allows the user to query the HCA by relating fields to
 certain values. Character fields can be queried using the operators:
 - `==`
-- `!=`
 - `%in%`
-- `%startsWith%`
-- `%endsWith%`
-- `%contains%`
-
-Numeric fields can be queried with the operators:
-- `==`
-- `!=`
-- `%in%`
-- `>`
-- `<`
-- `>=`
-- `<=`
-
-Queries can be encompassed by parenthesese
-- `()`
-
-Queries can be negated by placing the `!` symbol in front
 
 Combination operators can be used to combine queries
 - `&`
-- `|`
 
 As an example, in order to find HCA resources associated with the brain. It can
 the be seen by looking at the result of the `fields` method, that
@@ -210,7 +187,7 @@ the be seen by looking at the result of the `fields` method, that
 Running `organ.text` through `values`, we see the following:
 
 ```{r availabeOrgan}
-hca %>% values('organ.text')
+hca %>% values('organ')
 ```
 
 Now we see that "brain" and "Brain" are available values. Since these values are
@@ -218,94 +195,35 @@ the result of input by other users, there may be errors or inconsistencies. To
 be safe, both fields can be queried with the following query:
 
 ```{r firstFilter}
-hca2 <- hca %>% filter(organ.text == c('Brain', 'brain'))
-hca2 <- hca %>% filter(organ.text %in% c('Brain', 'brain'))
-hca2 <- hca %>% filter(organ.text == Brain | organ.text == brain)
+hca2 <- hca %>% filter(organ == c('blood', 'brain'))
+hca2 <- hca %>% filter(organ %in% c('blood', 'brain'))
 hca2
 ```
 
 If we also wish to search for results based on the NCBI Taxon ID for mouse,
 10090, as well as brain, we can perform this query in a variety of ways.
 ```{r multiFilter}
-hca2 <- hca %>% filter(organ.text %in% c('Brain', 'brain')) %>%
-                filter('specimen_from_organism_json.biomaterial_core.ncbi_taxon_id' == 10090)
-hca2 <- hca %>% filter(organ.text %in% c('Brain', 'brain'),
-                       'specimen_from_organism_json.biomaterial_core.ncbi_taxon_id' == 10090)
-hca <- hca %>% filter(organ.text %in% c('Brain', 'brain') &
-                      'specimen_from_organism_json.biomaterial_core.ncbi_taxon_id' == 10090)
+hca2 <- hca %>% filter(organ %in% c('Brain', 'brain')) %>% filter(disease == 'normal')
+hca2 <- hca %>% filter(organ %in% c('Brain', 'brain'), disease == 'normal')
+hca <- hca %>% filter(organ %in% c('Brain', 'brain') & disease == 'normal')
 hca
 ```
 
-The `HCABrowser` package is able to handle arbitrarily complex queries on the
-Human Cell Atlas.
-
-```{r complexFilter}
-hca2 <- hca %>% filter((!organ.text %in% c('Brain', 'blood')) & 
-                       (files.specimen_from_organism_json.genus_species.text == "Homo sapiens" |
-                        library_preparation_protocol_json.library_construction_approach.text == 'Smart-seq2')
-                )
-hca2
-``` 
-
-The `HCABrowser` object can undo the most recent queries run on it.
+The `HCAExplorer` object can undo the most recent queries run on it.
 
 ```{r undoQuery}
-hca <- hca %>% filter(organ.text == heart)
-hca <- hca %>% filter(organ.text != brain)
-hca <- hca %>% undoEsQuery(n = 2)
+hca <- HCAExplorer()
+hca <- hca %>% filter(organ == blood)
+hca <- hca %>% filter(disease == normal)
+hca <- hca %>% undoQuery(n = 1L)
 hca
 ```
 
 If one would want to start from a fresh query but retain the modifications made
-to the `HCABrowser` object, the `resetEsQuery()` method can be used.
+to the `HCAExplorer` object, the `resetEsQuery()` method can be used.
 
 ```
-hca <- hca %>% resetEsQuery
-hca
-```
-
-Using `fields()`, we can find that the fields `paired_end` and
-`organ.ontology` are availiable. These fields can be shown in our resulting
-`HCABrowser` object using the `select()` method.
-
-```{r select}
-hca2 <- hca %>% select('paired_end', 'organ.ontology')
-#hca2 <- hca %>% select(paired_end, organ.ontology)
-hca2 <- hca %>% select(c('paired_end', 'organ.ontology'))
-hca2
-```
-
-Finally, instead of a using the `filter` and `select` methods, one can query
-the Human Cell Atlas by using a json query and the `postSearch()` method.
-Note that unabbreviated names must be used for these kinds of queries.
-
-```{r jsonQuery}
-
-```
-
-## Obtaining results from the HCABrowser object
-
-Once the user is satisfied with their query, the `results()` method can be
-used to create a tibble of the first `n` bundles in the search.
-Note that since the maximum page size is `10`, the method will need to make
-multiple requests to the hca dcp. This may take some time for large requests.
-
-```{r downloadHCA}
-res <- hca %>% results(n = 36)
-res
-```
-
-One can also simply pull bundles from the HCABrowser object's results.
-
-```{r pullBundles}
-bundle_fqids <- hca %>% pullBundles(n = 1)
-bundle_fqids
-```
-
-One can query using just the bundle fqids by using the `showBundles` method.
-
-```{r showBundles}
-hca <- hca %>% showBundles(bundle_fqids = bundle_fqids)
+hca <- hca %>% resetQuery
 hca
 ```
 
@@ -317,7 +235,7 @@ sessionInfo()
 
 - The `S3` object-oriented programming paradigm is used.
 - Methods from the `dplyr` package can be used to manipulate objects in the
-`HCABrowser` package.
+`HCAExplorer` package.
 - In the future, we wish to expand the functionalit of this packages to cover
 the remaining functionality of the hca dcp api.
 

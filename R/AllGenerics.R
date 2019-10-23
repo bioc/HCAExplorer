@@ -1,4 +1,11 @@
-#' @export
-setGeneric("nextResults", function(result, ...) standardGeneric("nextResults"))
+setGeneric('nextResults', function(hca, ...) standardGeneric('nextResults'))
+setGeneric('undoQuery', function(hca, ...) standardGeneric('undoQuery'))
+setGeneric('resetQuery', function(hca, ...) standardGeneric('resetQuery'))
+setGeneric('per_page', function(hca, ...) standardGeneric('per_page'))
+setGeneric('activate', function(hca, ...) standardGeneric('activate'))
+setGeneric('viewProjects', function(hca, ...) standardGeneric('viewProjects'))
+setGeneric('getManifest', function(hca, ...) standardGeneric('getManifest'))
+setGeneric('getManifestFileFormats', function(hca, ...) standardGeneric('getManifestFileFormats'))
+setGeneric('fields', function(hca, ...) standardGeneric('fields'))
+setGeneric('results', function(object, ...) standardGeneric('results'))
 
-setGeneric("fields", function(hca, ...) standardGeneric("fields"))

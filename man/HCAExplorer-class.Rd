@@ -6,11 +6,15 @@
 \alias{.HCAExplorer}
 \title{The Project Browser Class}
 \arguments{
-\item{url}{character(1) The url of the Human Cell Atlas.}
+\item{per_page}{the number of results to display per request.}
+
+\item{url}{character(1) The url of the Human Cell Atlas Backend to access.}
 }
 \description{
-A still tentative class that displays Human Cell Atlas
- information by projects.
+A class that displays Human Cell Atlas(HCA) information obtained
+ from a digested version of the Human Cell Atlas referred to as the Azul
+ Backend. This class allows one to view, filter, and select entries in the
+ to ultimately download metadata files and then other data such as matrices.
 }
 \author{
 Daniel Van Twisk

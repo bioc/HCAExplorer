@@ -8,6 +8,9 @@
 \usage{
 \S4method{fields}{HCAExplorer}(hca)
 }
+\arguments{
+\item{hca}{An HCAExplorer object}
+}
 \value{
 A tibble indicating fields that can be queried upon.
 }

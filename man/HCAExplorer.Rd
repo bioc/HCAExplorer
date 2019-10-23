@@ -4,12 +4,11 @@
 \alias{HCAExplorer}
 \title{The Project Browser Class}
 \usage{
-
-  HCAExplorer(url = "https://service.explore.data.humancellatlas.org/repository/projects",
+HCAExplorer(url = "https://service.explore.data.humancellatlas.org",
   per_page = 15)
 }
 \arguments{
-\item{url}{character(1) The url of the Human Cell Atlas.}
+\item{url}{character(1) The url of the Human Cell Atlas Backend to access.}
 
 \item{per_page}{the number of results to display per request.}
 }
@@ -17,12 +16,16 @@
 a HCAExplorer object
 }
 \description{
-A still tentative class that displays Human Cell Atlas
- information by projects.
+A class that displays Human Cell Atlas(HCA) information obtained
+ from a digested version of the Human Cell Atlas referred to as the Azul
+ Backend. This class allows one to view, filter, and select entries in the
+ to ultimately download metadata files and then other data such as matrices.
 }
 \examples{
-pb <- HCAExplorer()
-pb
+hca <- HCAExplorer(per_page = 15,
+                   url = 'https://service.explore.data.humancellatlas.org')
+hca
+
 }
 \author{
 Daniel Van Twisk

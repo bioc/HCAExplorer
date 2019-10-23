@@ -1,5 +1,6 @@
 
 #' @importFrom plyr rbind.fill
+#' @importFrom tidygraph as_tibble
 .parse_project_get <- function(project, results)
 {
     upfront <- lapply(results[[1]], function(x) {
@@ -15,7 +16,10 @@
 #        df
         df
     })
-    project@terms <- results[['termFacets']]
+    terms <- results[['termFacets']]
+    if(is.null(terms))
+        terms <- list()
+    project@terms <- terms
     upfront <- do.call(rbind.fill, upfront)
     project@results <- as_tibble(upfront)
     project@search_after <- curl::curl_escape(results[[2]][["search_after"]])

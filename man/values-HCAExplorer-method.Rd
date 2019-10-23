@@ -22,7 +22,6 @@ List all values for certain fields in a HCAExplorer Object
 }
 \examples{
 hca <- HCAExplorer()
-vals <- hca \%>\% values('organ')
-vals
+hca \%>\% values('organ')
 
 }
