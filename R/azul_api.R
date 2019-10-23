@@ -8,6 +8,7 @@
     .parse_project_get(project, con)
 }
 
+#' @importFrom httr stop_for_status
 .projectGet <- function(project, filter, per_page=15)
 {
     url <- project@url
@@ -17,6 +18,7 @@
     project <- .project_content(project, project_res)
     summary_url <- paste0(url, '/repository/summary?', filter)
     summary_res <- httr::GET(summary_url)
+    httr::stop_for_status(summary_res)
     summary_res <- httr::content(summary_res)
     project@totalFileSize <- summary_res$totalFileSize
     project@fileCount <- summary_res$fileCount

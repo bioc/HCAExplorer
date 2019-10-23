@@ -76,6 +76,17 @@ BiocManager::install('HCAExplorer')
 library(HCAExplorer)
 ```
 
+# Obtaining Metadata files from the HCAExplorer
+
+One of the primary tasks of the HCAExplorer is to obtain metadata files of
+projects and then pass them down to other pipelines to download useful
+information like expression matrices. To illustrate the functionality of the
+package, we will first embark on the task of obtaining expression matrices
+from a selection of projects. We will first, initiate an HCAExplorer object,
+then look at functions useful for navigating the HCAExplorer object, and finally
+we will download the manifest file and use it to obtain expression matrices as
+a LoomExperiment object.
+
 ## Connecting to the Human Cell Atlas
 
 The `r Biocpkg("HCAExplorer")` package relies on having network
@@ -123,16 +134,13 @@ To toggle whether prjects, samples, or file are being displayed in the `tibble`,
 the `activate()` method can be used to choose which to display.
 
 ```{r activate}
-## Bundles are diaplyed be default
-nrow(results(hca))
-
 ## The HCAExplorer object is activated here by 'files'
 hca <- hca %>% activate('samples')
 hca
-nrow(results(hca))
 
 ## Revert back to showing bundles with 'bundles'
 hca <- hca %>% activate('projects')
+hca
 ```
 
 Since there are more projects in the HCA than can be shown, if `link` is
@@ -143,88 +151,104 @@ hca <- nextResults(hca)
 hca
 ```
 
-# A working example: Obtaining Metadata files from the HCAExplorer
-
-One of the primary tasks of the HCAExplorer is to obtain metadata files of
-projects and then pass them down to other pipelines to download useful
-information like expression matrices.
-
 ## Querying the HCAExplorer
 
-To show which fields are available to query, use the `supportedFilters()` method.
+Once the HCAExplorer object is made, one can beging browsing the data present in
+the Human Cell Atlas.
+
+Suppose we would like to search projects that have samples taken from a
+particular organ. First, it is helpdul to understand which fields are available
+to query upon. To do this, use the `fields()` method.
 
 ```{r fields}
 hca <- HCAExplorer()
 hca %>% fields
 ```
-
-The `abbreviated_fields` column indicates the shortest possible name that can be
-used to reference the field. The `field_names` columns shows the whole schema
-name on the json schema.
-
-Availiable values to these fields can be found using the `values()` method.
-If the parameter `fields` is specified, it will display values related to those
-field. If not specified, the values for all fields will be shown.
+This function return all possible fields that can be queried upon. We can now
+see that their is a field named "organ". Since, we are looking at what
+values are avaiable for querying on organs, we can now use the `values()`
+method to do just that.
 
 ```{r valuess}
-hca %>% values(c('organ'))
+hca %>% values('organ')
 ```
 
-HCAExplorer extends the functionality of the `r CRANpkg("dplyr")` package's `filter()`
-and `select()` methods.
+We can now see all possible values of 'organ' across all project as well as
+their frequency. Let's now decide that we would like to see projects that
+involve either blood or brain samples. The next step is to perform the query.
 
-The `filter()` method allows the user to query the HCA by relating fields to
-certain values. Character fields can be queried using the operators:
+The HCAExplorer extends the functionality of the `r CRANpkg("dplyr")` package's
+`filter()` and `select()` methods.
+
+The `filter()` method allows the user to query the Human Cell Atlas by relating
+fields to certain values. Character fields can be queried using the operators:
 - `==`
 - `%in%`
 
 Combination operators can be used to combine queries
 - `&`
 
-As an example, in order to find HCA resources associated with the brain. It can
-the be seen by looking at the result of the `fields` method, that
-`organ.text` can be used to reference `files.specimen_from_organism.organ.text`.
-Running `organ.text` through `values`, we see the following:
-
-```{r availabeOrgan}
-hca %>% values('organ')
-```
-
-Now we see that "brain" and "Brain" are available values. Since these values are
-the result of input by other users, there may be errors or inconsistencies. To
-be safe, both fields can be queried with the following query:
+We can use either the `==` or `%in%` operator in a filter statement to contruct
+a query.
 
 ```{r firstFilter}
 hca2 <- hca %>% filter(organ == c('blood', 'brain'))
-hca2 <- hca %>% filter(organ %in% c('blood', 'brain'))
-hca2
+hca <- hca %>% filter(organ %in% c('blood', 'brain'))
+hca
 ```
 
-If we also wish to search for results based on the NCBI Taxon ID for mouse,
-10090, as well as brain, we can perform this query in a variety of ways.
+Suppose we also wish to search also search for results based on the disease.
+We already know a "disease" field exists from our `field()` function. Now we
+can see what disease values are present in our current results.
+
+```{r second_values}
+hca2 %>% values('disease')
+```
+These are the possible values only for the results of our previous search.
+Now suppose we would like to search for project only that have samples with no
+disease (we see through `values()` that this is labeled as "normal"). We can
+now accomplish this with any of the following searchs. To show multiple
+searches, we will also use the methods `undoQuery()` and `resetQuery()` to step
+reset our search. `undoQuery()` can step back one or many queries.
+`resetQuery()` undos all queries.
+
 ```{r multiFilter}
-hca2 <- hca %>% filter(organ %in% c('Brain', 'brain')) %>% filter(disease == 'normal')
-hca2 <- hca %>% filter(organ %in% c('Brain', 'brain'), disease == 'normal')
+hca <- hca %>% filter(disease == 'normal')
+hca <- hca %>% undoQuery(n = 2L)
+hca <- hca %>% filter(organ %in% c('Brain', 'brain'), disease == 'normal')
+hca <- hca %>% resetQuery
 hca <- hca %>% filter(organ %in% c('Brain', 'brain') & disease == 'normal')
 hca
 ```
 
-The `HCAExplorer` object can undo the most recent queries run on it.
+We can refine out search further by using the `select()` method to only include
+a few results. This works differently than `select()` in other tidyverse
+packages. Here, `select()` can be used to select paricular rows by either 
+index or project name. These selections are added to out search as a query
+against the "projectId". Here we take the first two results from our
+HCAExplorer object.
 
-```{r undoQuery}
-hca <- HCAExplorer()
-hca <- hca %>% filter(organ == blood)
-hca <- hca %>% filter(disease == normal)
-hca <- hca %>% undoQuery(n = 1L)
-hca
+```{r select}
+hca <- hca %>% select(projects=c(1, 2))
 ```
 
-If one would want to start from a fresh query but retain the modifications made
-to the `HCAExplorer` object, the `resetEsQuery()` method can be used.
+## Obtaining manifest files from the HCAExplorer
 
+Now that we have completed our query, we can obtain the file manifest of our 
+selected projects. First, we must find which possible file formats are
+available for download. To do this, we use the `getManifestFileFormats()`.
+
+```{r getManifestFileFormats}
+formats <- hca %>% getManifestFileFormats
+formats
 ```
-hca <- hca %>% resetQuery
-hca
+
+Now that we have the possible file formats, we can download the manifest 
+as a `tibble`. To do this, we use the `getManifest()` method.
+
+```{r getManifest}
+manifest <- hca %>% getManifest(fileFormat = formats[1])
+manifest
 ```
 
 ```{r sessionInfo}
