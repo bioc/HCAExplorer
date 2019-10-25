@@ -63,7 +63,7 @@ fields <- .fields
 #' fields(x)
 #'
 #' ## Which values can "organ" be searched with?
-#' value(x, 'organ')
+#' values(x, 'organ')
 #'
 #' @importFrom S4Vectors values
 #' @export
@@ -225,7 +225,7 @@ filter.HCAExplorer <- function(.data, ..., .preserve)
 #' @export
 select.HCAExplorer <- function(.data, ...)
 {
-    .data <- hca
+    hca <- .data
     selected <- unlist(list(...))
     hca@selected <- intersect(hca@selected, selected)
     hca

@@ -338,7 +338,6 @@ function(x, n = 1L)
     resetQuery(x)
     else{
         x@query <- head(x@query, -c(n))
-        x@es_source <- head(x@es_source, -c(n))
         filter(x)
     }
 }

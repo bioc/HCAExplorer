@@ -30,7 +30,7 @@ x <- HCAExplorer()
 fields(x)
 
 ## Which values can "organ" be searched with?
-value(x, 'organ')
+values(x, 'organ')
 
 }
 \seealso{
