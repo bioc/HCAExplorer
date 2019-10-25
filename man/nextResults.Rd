@@ -6,10 +6,10 @@
 \alias{nextResults,HCAExplorer-method}
 \title{Next Results}
 \usage{
-\S4method{nextResults}{HCAExplorer}(hca)
+\S4method{nextResults}{HCAExplorer}(x)
 }
 \arguments{
-\item{hca}{An HCAExplorer object}
+\item{x}{An HCAExplorer object}
 }
 \value{
 A HCAExplorer object that displays the next results
@@ -19,9 +19,9 @@ Fetch the next set of entries from a HCAExplorer Object
 }
 \examples{
 
-hca <- HCAExplorer()
-hca <- hca \%>\% nextResults
-hca
+x <- HCAExplorer()
+x <- x \%>\% nextResults
+x
 
 }
 \author{

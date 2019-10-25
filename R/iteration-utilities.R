@@ -22,8 +22,9 @@
     project@terms <- terms
     upfront <- do.call(rbind.fill, upfront)
     project@results <- as_tibble(upfront)
-    project@search_after <- curl::curl_escape(results[[2]][["search_after"]])
-    project@search_after_uid <- curl::curl_escape(results[[2]][["search_after_uid"]])
+    project@searchAfter <- curl::curl_escape(results[[2]][["search_after"]])
+    project@searchAfterUid <- curl::curl_escape(results[[2]][["search_after_uid"]])
+    project@totalPages <- results[[2]][["pages"]]
     project
 }
 

@@ -22,10 +22,12 @@ setOldClass('quosures')
         results = "tbl_df",
         activated = 'character',
         query = "quosures",
-        es_source = "quosures",
-        search_term = "list",
-        per_page = "numeric",
-        current_filter = "character",
+        selected = "character",
+        searchTerm = "list",
+        perPage = "numeric",
+        totalPages = "numeric",
+        currentPage = "numeric",
+        currentFilter = 'character',
         terms = "list",
         totalCellCount = 'numeric',
         donorCount = 'numeric',
@@ -34,8 +36,8 @@ setOldClass('quosures')
         labCount = 'numeric',
         fileCount = 'numeric',
         totalFileSize = 'numeric',
-        search_after = "character",
-        search_after_uid = "character"
+        searchAfter = "character",
+        searchAfterUid = "character"
     )
 )
 
@@ -64,10 +66,10 @@ HCAExplorer <-
     function(url='https://service.explore.data.humancellatlas.org',
              per_page = 15)
 {
-    project <- .HCAExplorer(url=url, per_page = per_page, results = tibble(),
-                               query = quos(), es_source = quos(),
-                               activated = 'projects', terms = list())
-    .init_HCAExplorer(project)
+    x <- .HCAExplorer(url=url, perPage = per_page, results = tibble(),
+                               query = quos(), activated = 'projects',
+                               terms = list(), currentPage = 1)
+    activate(x, 'projects')
 }
 
 #' The ProjectView class

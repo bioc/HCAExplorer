@@ -4,22 +4,33 @@
 \name{results}
 \alias{results}
 \alias{results,HCAExplorer-method}
-\title{Obtain search results from a HCAExplorer Object}
+\title{Obtain search unattenuated results tibble from an HCAExplorer Object}
 \usage{
-\S4method{results}{HCAExplorer}(object)
+\S4method{results}{HCAExplorer}(x)
 }
 \arguments{
-\item{object}{An HCAExplorer object}
+\item{x}{An HCAExplorer object.}
 }
 \value{
-a tibble
+a tibble giving the unattenuated search results of the HCAExplorer
+ object.
 }
 \description{
 Returns a tibble either showing bundles or files based on whichever is
- activated.
+ activated. The tibble returned will display the full results of the search
+ instead of the attenuated table shows when dispalying the HCAExplorer
+ object.
 }
 \examples{
- hca <- HCAExplorer()
- hca \%>\% results
+ ## Initiate an HCAExplorer object.
+ x <- HCAExplorer()
+ ## Display the object. Note that the tibble contains very few columns.
+ x
 
+ ## Access the tibble and display at available columns using results()
+ results(x)
+
+}
+\seealso{
+[HCAExplorer()] [tibble()]
 }

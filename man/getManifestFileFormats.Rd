@@ -6,10 +6,10 @@
 \alias{getManifestFileFormats,HCAExplorer-method}
 \title{Show all possible manifest file formats for current selection}
 \usage{
-\S4method{getManifestFileFormats}{HCAExplorer}(hca)
+\S4method{getManifestFileFormats}{HCAExplorer}(x)
 }
 \arguments{
-\item{hca}{An HCAExplorer object}
+\item{x}{An HCAExplorer object}
 }
 \value{
 A character vecotr of information about possible file formats.
@@ -20,7 +20,20 @@ Show all possible manifest file formats for the
  used in conjunction with 'getManifest()'.
 }
 \examples{
- hca <- HCAExplorer()
- hca \%>\% getManifestFileFormats
+ ## Initiate an HCAExplorer object.
+ x <- HCAExplorer()
+ ## View the HCAExplorer object to decide which projects to subset.
+ x
 
+ ## Decide to subset to just obtain the first two projects.
+ x[1:2,]
+ x
+
+ ## Get all possible manifest file formats for projects.
+ formats <- getManifestFileFormats(x)
+ formats
+
+}
+\seealso{
+[HCAExplorer()], [getManifest()]
 }

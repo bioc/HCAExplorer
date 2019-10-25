@@ -2,29 +2,40 @@
 % Please edit documentation in R/filter-utilities.R
 \name{select.HCAExplorer}
 \alias{select.HCAExplorer}
-\title{Filter entries by position or name}
+\title{Select columns to display upon showing the object}
 \usage{
-\method{select}{HCAExplorer}(.data, ..., projects)
+\method{select}{HCAExplorer}(.data, ...)
 }
 \arguments{
-\item{.data}{An HCAObject to filter}
+\item{.data}{An HCAObject to filter.}
 
-\item{...}{Unused argument}
-
-\item{projects}{numeric or character. Either the positions in the output show
-method of the HCAExplorer object or the entries' names.}
+\item{...}{Columns to be displayed.}
 }
 \value{
 An HCAExplorer object with the applied filter.
 }
 \description{
-This function works differently from other usages of select.
- This function allows the user to filter entries based on position or name.
- This function creates a filter targeting the entryId.
+An HCAExplorer object is intitated with certain default columns
+ being displayed upon showing the object. This method allows a user to
+ display columns other than the default columns when displaying the object.
 }
 \examples{
- hca <- HCAExplorer()
- hca
- hca \%>\% select(projects = c(1, 2))
+ ## Intiate an HCAExplorer object
+ x <- HCAExplorer()
+ x
 
+ ## Use the results() method to display which columns are present.
+ results(x)
+
+ ## Select the 'projects.projectTitle' and 'samples.organ' columns.
+ x <- x \%>\% select('projects.projectTitle', 'samples.organ')
+ x
+
+ ## Use resetSelect() to return to the original selection
+ x <- resetSelect(x)
+ x
+
+}
+\seealso{
+[HCAExplorer()], [resetSelect()]
 }

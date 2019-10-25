@@ -6,10 +6,10 @@
 \alias{undoQuery,HCAExplorer-method}
 \title{Undo one or multiple queries performed on an object}
 \usage{
-\S4method{undoQuery}{HCAExplorer}(hca, n = 1L)
+\S4method{undoQuery}{HCAExplorer}(x, n = 1L)
 }
 \arguments{
-\item{hca}{An HCAExplorer object}
+\item{x}{An HCAExplorer object}
 
 \item{n}{integer(1). The number of queries to step back from.}
 }
@@ -21,9 +21,30 @@ Undo one or multiple queries performed on an HCAExplorer
  object then return the result.
 }
 \examples{
- hca <- HCAExplorer()
- hca <- hca \%>\% filter(organ == 'blood')
- hca <- hca \%>\% select(projects = c(1, 2))
- hca \%>\% undoQuery(n = 1L)
+ ## Initiate an HCAExplorer Object
+ x <- HCAExplorer()
 
+ ## First we want to perform a search for certain organs.
+ ## Display possible fields looking for organs.
+ fields(x)
+ ## organs can be queried with "organ".
+ ## What values can the field "organ" have?
+ values(x, "organ")
+
+ ## Construct a query looking for projects that involve brain.
+ x <- x \%>\% filter(organ == brain)
+ x
+
+ ## Now select the first two projects by row.
+ x <- x[1:2,]
+ x
+
+ ## Finally we can remove the previous query using undoQuery().
+ ## search.
+ x <- undoQuery(x, n = 1)
+ x
+
+}
+\seealso{
+[HCAExplorer()], [resetQuery()]
 }

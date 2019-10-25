@@ -8,20 +8,31 @@
 \S4method{values}{HCAExplorer}(x, fields)
 }
 \arguments{
-\item{x}{A HCAExplorer Object.}
+\item{x}{An HCAExplorer Object.}
 
-\item{fields}{a character vector of fields to display avaiable values for.}
+\item{fields}{A character vector of fields to display avaiable values for.}
 
-\item{...}{Other arguments.}
+\item{...}{Unused arguments.}
 }
 \value{
-a list of possible values for a filter
+a character vector of possible values for a filter.
 }
 \description{
-List all values for certain fields in a HCAExplorer Object
+To be used in conjunction with the fields function. This
+ function allows one to find which values can be queried upon in a given
+ field.
 }
 \examples{
-hca <- HCAExplorer()
-hca \%>\% values('organ')
+## Intiate an HCAExplorer object.
+x <- HCAExplorer()
 
+## Find which firelds can be queried upon.
+fields(x)
+
+## Which values can "organ" be searched with?
+value(x, 'organ')
+
+}
+\seealso{
+[HCAExplorer()] [fields()]
 }

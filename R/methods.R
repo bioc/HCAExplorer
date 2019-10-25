@@ -1,39 +1,35 @@
 
-.init_HCAExplorer <- function(project)
+.results <- function(x)
 {
-    res <- filter(project)
-    res
+    x@results
 }
 
-.results <- function(object)
-{
-    res <- object@results
-    if(object@activated == "projects")
-    sel <- c('projects.projectTitle', 'samples.sampleEntityType', 'samples.organ', 'protocols.libraryConstructionApproach', 'protocols.pairedEnd', 'donorOrganisms.genusSpecies', 'samples.disease')
-    if(object@activated == "samples")
-    sel <- c('samples.id', 'projects.projectTitle', 'samples.sampleEntityType', 'samples.organ', 'samples.organPart', 'cellSuspensions.selectedCellType', 'protocols.libraryConstructionApproach', 'protocols.pairedEnd', 'donorOrganisms.genusSpecies', 'donorOrganisms.organismAge', 'donorOrganisms.biologicalSex', 'samples.disease')
-    if(object@activated == "files")
-    sel <- c('samples.id', 'samples.sampleEntityType', 'samples.organ', 'samples.organPart', 'protocols.libraryConstructionApproach', 'protocols.pairedEnd', 'donorOrganisms.genusSpecies', 'donorOrganisms.organismAge', 'samples.disease')
-    hca <- select(res, sel)
-}
-
-#' Obtain search results from a HCAExplorer Object
+#' Obtain search unattenuated results tibble from an HCAExplorer Object
 #'
 #' @description
 #'  Returns a tibble either showing bundles or files based on whichever is
-#'  activated.
+#'  activated. The tibble returned will display the full results of the search
+#'  instead of the attenuated table shows when dispalying the HCAExplorer
+#'  object.
 #'
-#' @param object An HCAExplorer object
+#' @param x An HCAExplorer object.
 #'
-#' @return a tibble
+#' @return a tibble giving the unattenuated search results of the HCAExplorer
+#'  object.
 #'
 #' @examples
-#'  hca <- HCAExplorer()
-#'  hca %>% results
+#'  ## Initiate an HCAExplorer object.
+#'  x <- HCAExplorer()
+#'  ## Display the object. Note that the tibble contains very few columns.
+#'  x
+#'
+#'  ## Access the tibble and display at available columns using results()
+#'  results(x)
 #'
 #' @name results
 #' @aliases results,HCAExplorer-method
 #' @docType methods
+#' @seealso [HCAExplorer()] [tibble()]
 #'
 #' @importFrom dplyr distinct
 #' @importFrom httr GET content
@@ -41,11 +37,11 @@
 setMethod('results', 'HCAExplorer', .results)
 
 .viewProjects <-
-function(hca)
+function(x)
 {
-    ids <- hca@results$entryId
+    ids <- x@results$entryId
     ret <- lapply(ids, function(id) {
-        url <- paste0(hca@url, '/repository/projects/', id)
+        url <- paste0(x@url, '/repository/projects/', id)
         res <- httr::GET(url)
         res <- httr::content(res)
         res
@@ -65,11 +61,11 @@ function(hca)
     #    cat('Cell Count Estimate\t\t', as.character(res[,"fileTypeSummaries.count"]), "\n")
     
     #    cat("\nDescription\n")
-    #    cat(as.character(hca[,"project_json.project_core.project_description"]), "\n")
+    #    cat(as.character(x[,"project_json.project_core.project_description"]), "\n")
     
     #    cat("\n")
     
-    #    cat('Publications\t\t', as.character(hca[,'publication.publication_title']), "\n")
+    #    cat('Publications\t\t', as.character(x[,'publication.publication_title']), "\n")
     #    cat('Laboratory\t\t\t', as.character(res[,'projects.laboratory']), "\n")
     ret
 }
@@ -77,20 +73,36 @@ function(hca)
 #' View all metadata about a selection of projects
 #'
 #' @description Returns a list of all the metadata from the current selection
-#'  of entries in the HCAExplorer object.
+#'  of entries in the HCAExplorer object as a projectView object. This method is
+#'  is meant to return a clear and useful represntation of the metadata of a
+#'  selection of projects.
 #'
-#' @param hca An HCAExplorer object
+#' @param x An HCAExplorer object
 #'
-#' @return A list of all metadata in the selected entries
+#' @return A list of all metadata in the selected entries. This list will
+#'  contain mulitple lists representing the metadata.
 #'
 #' @examples
-#'  hca <- HCAExplorer()
-#'  view <- hca %>% viewProjects()
+#'  ## Initiate an HCAExplorer object.
+#'  x <- HCAExplorer()
+#'  x
+#'
+#'  ## Use viewProjects to show all metadata information relating to a project.
+#'  view <- viewProjects(x)
+#'  view
+#'
+#'  ## Subset the data to obtain the first two rows.
+#'  x <- x[1:2,]
+#'  x
+#'
+#'  ## Fewer projects have there metadata shown due to our previous subset.
+#'  view <- viewProjects(x)
 #'  view
 #'
 #' @name viewProjects
 #' @aliases viewProjects,HCAExplorer-method
 #' @docType methods
+#' @seealso [HCAExplorer()][projectView()]
 #'
 #' @export
 
@@ -100,16 +112,16 @@ setMethod('viewProjects', 'HCAExplorer', .viewProjects)
 {
     dots <- quos(...)
     project <- .data
-    search_term <- Reduce(.project_filter_loop, dots, init = list())
-    paste0('filters=', curl::curl_escape(jsonlite::toJSON(search_term)))
+    searchTerm <- Reduce(.project_filter_loop, dots, init = list())
+    paste0('filters=', curl::curl_escape(jsonlite::toJSON(searchTerm)))
 }
 
-.getManifestFileFormats <- function(hca)
+.getManifestFileFormats <- function(x)
 {
-    url <- hca@url
-    res <- hca@results
+    url <- x@url
+    res <- x@results
     ids <- res$entryId
-    query <- .summary_filter(hca, projectId == ids)
+    query <- .summary_filter(x, projectId == ids)
     url <- paste0(url, '/repository/summary?', query)
     res <- httr::GET(url)
     res <- httr::content(res)
@@ -123,33 +135,55 @@ setMethod('viewProjects', 'HCAExplorer', .viewProjects)
 #'  current selection of projects in the HCAExplorer object. To be
 #'  used in conjunction with 'getManifest()'.
 #'
-#' @param hca An HCAExplorer object
+#' @param x An HCAExplorer object
 #'
 #' @return A character vecotr of information about possible file formats.
 #'
 #' @examples
-#'  hca <- HCAExplorer()
-#'  hca %>% getManifestFileFormats
+#'  ## Initiate an HCAExplorer object.
+#'  x <- HCAExplorer()
+#'  ## View the HCAExplorer object to decide which projects to subset.
+#'  x
+#'
+#'  ## Decide to subset to just obtain the first two projects.
+#'  x[1:2,]
+#'  x
+#'
+#'  ## Get all possible manifest file formats for projects.
+#'  formats <- getManifestFileFormats(x)
+#'  formats
 #'
 #' @name getManifestFileFormats
 #' @aliases getManifestFileFormats,HCAExplorer-method
 #' @docType methods
+#' @seealso [HCAExplorer()], [getManifest()]
 #'
 #' @export
 setMethod('getManifestFileFormats', 'HCAExplorer', .getManifestFileFormats)
 
-.getManifest <- function(hca, fileFormat)
+.getManifest <- function(x, fileFormat)
 {
-    url <- hca@url
-    res <- hca@results
+    url <- x@url
+    res <- x@results
     ids <- res$entryId
-    filters <- .summary_filter(hca, projectId == ids & fileFormat == fileFormat)
-    url <- paste0(hca@url, '/fetch/manifest/files?', filters, '&format=tsv')
+    filters <- .summary_filter(x, projectId == ids & fileFormat == fileFormat)
+    url <- paste0(x@url, '/fetch/manifest/files?', filters, '&format=tsv')
     res <- httr::GET(url)
-    res <- httr::content(res)
-    loc <- res$Location
-    loc <- httr::content(httr::GET(loc))$Location
-    httr::GET(loc, httr::timeout(60))
+    stop_for_status(res)
+    repeat{
+        url <- httr::content(res)$Location
+        res <- httr::GET(url)
+        status <- httr::content(res)$Status
+        if (status == 302)
+            break
+        sleep <- httr::content(res)$`Retry-After`
+        message('sleeping ', sleep, ' seconds')
+        Sys.sleep(sleep)
+    }
+    url <- httr::content(res)$Location
+    res <- httr::GET(url)
+    stop_for_status(res)
+    httr::content(res)
 }
 
 #' Obtain metadata information from an HCAExplorer object
@@ -157,74 +191,100 @@ setMethod('getManifestFileFormats', 'HCAExplorer', .getManifestFileFormats)
 #' @description Obtain metadata infromation from an HCAExplorer object.
 #'  This metadata can then be passed on to download files from other services.
 #'
-#' @param hca An HCAExplorer object
+#' @param x An HCAExplorer object
 #' @param fileFormat character. A character vector of file formats of metadata
-#'  to obtain.
+#'  to obtain. The possible aruments can be found using the
+#'  getManifestFileFormats method.
 #'
-#' @return a tibble of metadata information
+#' @return a tibble of metadata information.
 #'
 #' @examples
-#'  hca <- HCAExplorer()
-#'  hca <- hca %>% select(projects = c(1))
-#'  formats <- hca %>% getManifestFileFormats
-#'  hca %>% getManifest(fileFormat = formats[1])
+#'  ## Initiate an HCAExplorer object.
+#'  x <- HCAExplorer()
+#'  ## View the HCAExplorer object to decide which projects to subset.
+#'  x
+#'
+#'  ## Decide to subset first project.
+#'  x <- x[1,]
+#'  x
+#'
+#'  ## Get all possible manifest file formats for the project.
+#'  formats <- getManifestFileFormats(x)
+#'  formats
+#'
+#'  ## Obtain the manifest for the file using only the first format
+#'  manifest <- getManifest(x, formats[1])
+#'  manifest
 #'
 #' @name getManifest
 #' @aliases getManifest,HCAExplorer-method
 #' @docType methods
+#' @seealso [HCAExplorer()], [getManifestFileFormats()]
 #'
 #' @importFrom httr timeout
 #' @export
 setMethod('getManifest', 'HCAExplorer', .getManifest)
 
 .activate.HCAExplorer <-
-function(hca, what = c('projects', 'samples', 'files'))
+    function(.data, what = c('projects', 'samples', 'files'))
 {
+    x <- .data
     type <- match.arg(what)
-    if(type == 'projects') {
-        #hca@url <- 'https://service.explore.data.humancellatlas.org/repository/projects'
-        hca@activated <- 'projects'
-    }
-    else if (type == 'samples') {
-        #hca@url <- 'https://service.explore.data.humancellatlas.org/repository/samples'
-        hca@activated <- 'samples'
-    }
-    else if (type == 'files') {
-        #hca@url <- 'https://service.explore.data.humancellatlas.org/repository/files'
-        hca@activated <- 'files'
-    }
-    filter(hca)
+    if(type == "projects")
+        x@selected <- c('projects.projectTitle', 'samples.sampleEntityType', 'samples.organ', 'protocols.libraryConstructionApproach', 'protocols.pairedEnd', 'donorOrganisms.genusSpecies', 'samples.disease')
+    if(type == "samples")
+        x@selected <- c('samples.id', 'projects.projectTitle', 'samples.sampleEntityType', 'samples.organ', 'samples.organPart', 'cellSuspensions.selectedCellType', 'protocols.libraryConstructionApproach', 'protocols.pairedEnd', 'donorOrganisms.genusSpecies', 'donorOrganisms.organismAge', 'donorOrganisms.biologicalSex', 'samples.disease')
+    if(type == "files")
+        x@selected <- c('samples.id', 'samples.sampleEntityType', 'samples.organ', 'samples.organPart', 'protocols.libraryConstructionApproach', 'protocols.pairedEnd', 'donorOrganisms.genusSpecies', 'donorOrganisms.organismAge', 'samples.disease')
+    filter(x)
 }
+
+#' @importFrom tidygraph activate
+#' @export
+tidygraph::activate
 
 #' Activate projects, samples, or files to display in the HCAExplorer Object
 #'
-#' @name activate
-#' @aliases activate,HCAExplorer-method
-#' @docType methods
-#'
-#' @description Choose whether to display entries by project, samples, or files.
+#' @description The HCAExplorer can display its results in a variety of ways.
+#'  Choose whether to display entries by project, samples, or files.
 #'  The HCAExplorer class always defaults to projects.
 #'
-#' @param hca An HCAExplorer object
+#' @param .data An HCAExplorer object
 #' @param what character(1). Either 'projects', 'samples', or 'files'.
 #'
 #' @return An HCAExplorer object with medified activation.
 #'
-#' @examples
-#'  hca <- HCAExplorer()
-#'  hca %>% activate('samples')
-#'  hca %>% activate('files')
+#' @seealso [HCAExplorer()]
+#' @method activate HCAExplorer
 #'
-#' @importFrom tidygraph activate
+#' @examples
+#'  ## Initiate an HCAExplorer object.
+#'  x <- HCAExplorer()
+#'  ## Display the object. Notice "projects" are shown by default.
+#'  x
+#'
+#'  ## Now activate "samples" and now notice that "samples" are displayed.
+#'  x <- activate(x, 'samples')
+#'  x
+#'
+#'  ## Now activate "files" and now notice that "files" are displayed.
+#'  x <- activate(x, 'files')
+#'  x
+#'
+#'  ## Now activate "projects" and now notice that the original "projects" are
+#'  ## displayed.
+#'  x <- activate(x, 'projects')
+#'  x
+#'
 #' @export
-setMethod('activate', 'HCAExplorer', .activate.HCAExplorer)
+activate.HCAExplorer <- .activate.HCAExplorer
 
 .reset_query <-
-function(hca)
+function(x)
 {
-    hca@search_term <- list()
-    hca@query <- quos()
-    hca %>% filter()
+    x@searchTerm <- list()
+    x@query <- quos()
+    x %>% filter()
 }
 
 #' Reset all queries performed on an object
@@ -232,35 +292,54 @@ function(hca)
 #' @description Reset all queries performed on an HCAExplorer
 #'  object then return the result.
 #'
-#' @param hca An HCAExplorer object
+#' @param x An HCAExplorer object
 #'
 #' @return An HCAExplorer object with the changes applied to it.
 #'
 #' @examples
-#'  hca <- HCAExplorer()
-#'  hca <- hca %>% filter(organ == 'blood')
-#'  hca <- hca %>% select(projects = c(1, 2))
-#'  hca %>% resetQuery
+#'  ## Initiate an HCAExplorer Object
+#'  x <- HCAExplorer()
+#'
+#'  ## First we want to perform a search for certain organs.
+#'  ## Display possible fields looking for organs.
+#'  fields(x)
+#'  ## organs can be queried with "organ".
+#'  ## What values can the field "organ" have?
+#'  values(x, "organ")
+#'
+#'  ## Construct a query looking for projects that involve brain.
+#'  x <- x %>% filter(organ == brain)
+#'  x
+#'
+#'  ## Now select the first two projects by row.
+#'  x <- x[1:2,]
+#'  x
+#'
+#'  ## Finally we can remove the previous two queries to get the original empty
+#'  ## search.
+#'  x <- resetQuery(x)
+#'  x
 #'
 #' @name resetQuery
 #' @aliases resetQuery,HCAExplorer-method
 #' @docType methods
+#' @seealso [HCAExplorer()], [undoQuery()]
 #'
 #' @importFrom rlang quos
 #' @export
 setMethod('resetQuery', 'HCAExplorer', .reset_query)
 
 .undo_query <-
-function(hca, n = 1L)
+function(x, n = 1L)
 {
-    check <- length(hca@query) - n
-    hca@search_term <- list()
+    check <- length(x@query) - n
+    x@searchTerm <- list()
     if (check < 1)
-    resetQuery(hca)
+    resetQuery(x)
     else{
-        hca@query <- head(hca@query, -c(n))
-        hca@es_source <- head(hca@es_source, -c(n))
-        filter(hca)
+        x@query <- head(x@query, -c(n))
+        x@es_source <- head(x@es_source, -c(n))
+        filter(x)
     }
 }
 
@@ -269,23 +348,127 @@ function(hca, n = 1L)
 #' @description Undo one or multiple queries performed on an HCAExplorer
 #'  object then return the result.
 #'
-#' @param hca An HCAExplorer object
+#' @param x An HCAExplorer object
 #' @param n integer(1). The number of queries to step back from.
 #'
 #' @return An HCAExplorer object with the changes applied to it.
 #'
 #' @examples
-#'  hca <- HCAExplorer()
-#'  hca <- hca %>% filter(organ == 'blood')
-#'  hca <- hca %>% select(projects = c(1, 2))
-#'  hca %>% undoQuery(n = 1L)
+#'  ## Initiate an HCAExplorer Object
+#'  x <- HCAExplorer()
+#'
+#'  ## First we want to perform a search for certain organs.
+#'  ## Display possible fields looking for organs.
+#'  fields(x)
+#'  ## organs can be queried with "organ".
+#'  ## What values can the field "organ" have?
+#'  values(x, "organ")
+#'
+#'  ## Construct a query looking for projects that involve brain.
+#'  x <- x %>% filter(organ == brain)
+#'  x
+#'
+#'  ## Now select the first two projects by row.
+#'  x <- x[1:2,]
+#'  x
+#'
+#'  ## Finally we can remove the previous query using undoQuery().
+#'  ## search.
+#'  x <- undoQuery(x, n = 1)
+#'  x
 #'
 #' @name undoQuery
 #' @aliases undoQuery,HCAExplorer-method
 #' @docType methods
+#' @seealso [HCAExplorer()], [resetQuery()]
 #'
 #' @export
 setMethod('undoQuery', 'HCAExplorer', .undo_query)
+
+.resetSelect <- function(x)
+{
+    activate(x, x@activated)
+}
+
+#' Reset a select perform on an HCAExplorer object.
+#'
+#' @description This function will reset the selected slot of an HCAExplorer
+#'  object to its default selection.
+#'
+#' @param x An HCAExplorer Object
+#'
+#' @return An HCAExplorer object with its selected slot returned to its default
+#'  value.
+#'
+#' @examples  
+#'  ## Initiate an HCAExplorer Object.
+#'  x <- HCAExplorer
+#'  ## View object to decide which colums to select.
+#'  x
+#'
+#'  ## Decide to select columns 'projcts.projectTitle' and 'samples.organ'.
+#'  x <- x %>% select('project.projectTitle', 'samples.organ')
+#'  x
+#'
+#'  ## Revert selec() with resetSelect()
+#'  x <- resetSelect(x)
+#'  x
+#'
+#' @name resetSelect
+#' @aliases resetSelect,HCAExplorer-method
+#' @docType methods
+#' @seealso [HCAExplorer()], select()]
+#'
+#' @export
+setMethod('resetSelect', 'HCAExplorer', .resetSelect)
+
+.subset.HCAExplorer <- function(x, i, j, ...)
+{
+    if(!missing(j))
+    ## FIXME: maybe they could be subset by columns using a select statment?
+    stop('HCAExplorer object cannot be subset on columns.')
+    res <- x@results
+    if (is.character(i)) {
+        i <- which(res[['projects.projectTitle']] == i)
+    }
+    ids <- res[i,]$entryId
+    x %>% filter(projectId == ids)
+}
+
+#' Subset an HCAExplorer Object by row number or project name
+#'
+#' @description Allows subsetting an HCAExplorer object by row number or
+#'  project name. This method internally acts as a filter and actually
+#'  performs a query using "projectIds".
+#'
+#' @param x An HCAExplorer object.
+#' @param i Either a numeric vector indicating which rows to choose or a
+#'  character vector of project titles indicating which projects to choose.
+#' @param j Unused Argument.
+#' @param ... Unused Argument.
+#'
+#' @return An HCAExplorer object with the applied subset.
+#'
+#' @examples
+#'  ## Initiate an HCAExplorer Object.
+#'  x <- HCAExplorer
+#'  ## View object to decide which projects to choose.
+#'  x
+#'  ## Decide to select projects 1, 2, 3, and 7
+#'  x <- x[c(1:3, 7)]
+#'  x
+#' 
+#' @aliases `[`,HCAExplorer-method
+#' @docType methods
+#' @seealso [HCAExplorer()], [filter()]
+#'
+#' @export
+setMethod('[', c('HCAExplorer', 'ANY', 'ANY'), .subset.HCAExplorer)
+
+.attenuated_results <- function(x)
+{
+    select(x@results, x@selected)
+}
 
 .show_HCAExplorer <- function(object)
 {
@@ -298,8 +481,9 @@ setMethod('undoQuery', 'HCAExplorer', .undo_query)
     cat('Files:', object@fileCount, '\n')
     cat('File Size:', utils:::format.object_size(object@totalFileSize, "auto"), '\n')
     cat('\n')
-    cat('Showing', object@activated, 'with', object@per_page ,'results per page.')
-    print(results(object))
+    cat('Showing', object@activated, 'with', object@perPage ,'results per page.')
+    print(.attenuated_results(object))
+    cat('Showing page', object@currentPage, 'of', object@totalPages, '\n')
 }
 
 #' Show HCAExplorer
@@ -307,6 +491,12 @@ setMethod('undoQuery', 'HCAExplorer', .undo_query)
 #' @param object a HCAExplorer object to show
 #'
 #' @return outputs a text represntation of the object
+#'
+#' @examples
+#'  ## Initiate an HCAExplorer object.
+#'  x <- HCAExplorer()
+#'  ## Invoke show() by simply displaying the object.
+#'  x
 #'
 #' @importFrom methods show
 #' @export

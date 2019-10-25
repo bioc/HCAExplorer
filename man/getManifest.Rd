@@ -6,25 +6,41 @@
 \alias{getManifest,HCAExplorer-method}
 \title{Obtain metadata information from an HCAExplorer object}
 \usage{
-\S4method{getManifest}{HCAExplorer}(hca, fileFormat)
+\S4method{getManifest}{HCAExplorer}(x, fileFormat)
 }
 \arguments{
-\item{hca}{An HCAExplorer object}
+\item{x}{An HCAExplorer object}
 
 \item{fileFormat}{character. A character vector of file formats of metadata
-to obtain.}
+to obtain. The possible aruments can be found using the
+getManifestFileFormats method.}
 }
 \value{
-a tibble of metadata information
+a tibble of metadata information.
 }
 \description{
 Obtain metadata infromation from an HCAExplorer object.
  This metadata can then be passed on to download files from other services.
 }
 \examples{
- hca <- HCAExplorer()
- hca <- hca \%>\% select(projects = c(1))
- formats <- hca \%>\% getManifestFileFormats
- hca \%>\% getManifest(fileFormat = formats[1])
+ ## Initiate an HCAExplorer object.
+ x <- HCAExplorer()
+ ## View the HCAExplorer object to decide which projects to subset.
+ x
 
+ ## Decide to subset first project.
+ x <- x[1,]
+ x
+
+ ## Get all possible manifest file formats for the project.
+ formats <- getManifestFileFormats(x)
+ formats
+
+ ## Obtain the manifest for the file using only the first format
+ manifest <- getManifest(x, formats[1])
+ manifest
+
+}
+\seealso{
+[HCAExplorer()], [getManifestFileFormats()]
 }

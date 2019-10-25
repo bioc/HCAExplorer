@@ -1,44 +1,34 @@
 
-.range_ops = list(
-    '<' = "lt",
-    '<=' = "lte",
-    '>' = 'gt',
-    '>=' = 'gte'
-)
-
-.regexp_ops = c('contains', 'startsWith', 'endsWith')
-
-.range <- c('<', '<=', '>', '>=')
-
-.match_ops = list(
-    '==' = '='
-)
-
-.project_fields <- function(hca)
+.fields <- function(x)
 {
-    names(hca@terms)
+    names(x@terms)
 }
 
 #' List supported fields of an HCAExplorer object
 #'
+#' @description This function is used to discover possible fields that can be
+#'  queried upon in an HCAExplorer object.
+#'
+#' @param x An HCAExplorer object.
+#'
 #' @return A tibble indicating fields that can be queried upon.
 #' 
-#' @param hca An HCAExplorer object
-#'
 #' @name fields
-#' @aliases fields,HCAExplorer-method
-#' @docType methods
+#' @seealso [HCAExplorer()] [values()]
 #'
 #' @examples
-#' hca <- HCAExplorer()
-#' hca %>% fields
+#' ## Intiate an HCAExplorer object.
+#' x <- HCAExplorer()
 #'
-#' @importFrom utils head
+#' ## Find which firelds can be queried upon.
+#' fields(x)
+#'
 #' @importFrom tidygraph as_tibble
+#' @importFrom utils head
 #' @export
-setMethod("fields", "HCAExplorer", .project_fields)
+fields <- .fields
 
-.project_values <- function(x, fields)
+.project.values <- function(x, fields)
 {
     term <- x@terms
     field <- term[[fields]]
@@ -53,25 +43,45 @@ setMethod("fields", "HCAExplorer", .project_fields)
 
 #' List all values for certain fields in a HCAExplorer Object
 #'
-#' @param x A HCAExplorer Object.
-#' @param fields a character vector of fields to display avaiable values for.
-#' @param ... Other arguments.
+#' @description To be used in conjunction with the fields function. This
+#'  function allows one to find which values can be queried upon in a given
+#'  field.
 #'
-#' @return a list of possible values for a filter
+#' @param x An HCAExplorer Object.
+#' @param fields A character vector of fields to display avaiable values for.
+#' @param ... Unused arguments.
+#'
+#' @return a character vector of possible values for a filter.
+#'
+#' @seealso [HCAExplorer()] [fields()]
 #'
 #' @examples
-#' hca <- HCAExplorer()
-#' hca %>% values('organ')
+#' ## Intiate an HCAExplorer object.
+#' x <- HCAExplorer()
+#'
+#' ## Find which firelds can be queried upon.
+#' fields(x)
+#'
+#' ## Which values can "organ" be searched with?
+#' value(x, 'organ')
 #'
 #' @importFrom S4Vectors values
 #' @export
-setMethod("values", "HCAExplorer", .project_values)
+setMethod("values", "HCAExplorer", .project.values)
+
+.try_convert_colname_to_field <- function(x)
+{
+    if(grepl("^.*\\.", x)) {
+        x <- gsub("^.*\\.","", x)
+    }
+    x
+}
 
 .binary_op_project <- function(sep)
 {
     force(sep)
     function(e1, e2) {
-        field <- as.character(substitute(e1))
+        field <- .try_convert_colname_to_field(as.character(substitute(e1)))
         value <- try({
             e2
         }, silent = TRUE)
@@ -125,15 +135,37 @@ setMethod("values", "HCAExplorer", .project_values)
 #'
 #' @return An HCAExplorer object with the desired query performed.
 #'
+#' @seealso [HCAExplorer()]
+#'
 #' @examples
-#'  hca <- HCAExplorer()
-#'  hca %>% fields
-#'  hca %>% values('organ')
-#'  hca %>% values('disease')
-#'  ## Perform query (organ is 'blood' OR 'brain') AND disease is 'normal'.
-#'  hca %>% filter(organ == c('blood', 'brain') & disease == 'normal')
-#'  ## Also
-#'  hca %>% filter(organ == c('blood', 'brain'), disease == 'normal')
+#'  ## Initiate an HCAExplorer Object
+#'  x <- HCAExplorer()
+#'
+#'  ## First we want to perform a search for certain organs.
+#'  ## Display possible fields looking for organs.
+#'  fields(x)
+#'  ## organs can be queried with "organ".
+#'  ## What values can the field "organ" have?
+#'  values(x, "organ")
+#'
+#'  ## Construct a query looking for projects that involve blood or brain.
+#'  y <- x %>% filter(organ %in% c('blood', 'brain'))
+#'  y
+#'
+#'  ## Now suppose one would also like to find projects that have a certain
+#'  ## disease. What field corresponds to disease?
+#'  fields(y)
+#'  ## The "disease" field looks right.
+#'  ## What possible disease values can be queried upon?
+#'  values(y, "disease")
+#'
+#'  ## Add a query for a 'normal' diease state to our search.
+#'  y <- y %>% filter(disease == 'normal')
+#'  y
+#'
+#'  ## This entire query can also be performed at once in several ways.
+#'  x %>% filter(organ == c('blood', 'brain') & disease == 'normal')
+#'  x %>% filter(organ == c('blood', 'brain'), disease == 'normal')
 #'
 #' @importFrom curl curl_escape
 #' @importFrom dplyr filter
@@ -145,60 +177,62 @@ filter.HCAExplorer <- function(.data, ..., .preserve)
     project <- .data
     if (length(dots) == 0 && length(project@query) == 0) {
         ret <- paste0('filters=', curl::curl_escape('{}'))
-        project@current_filter <- ret
+        project@currentFilter <- ret
         .projectGet(project, ret)
     }
     else {
         query <- c(project@query, dots)
-        search_term <- Reduce(.project_filter_loop, query, init = list())
-#        if (length(search_term) > 1)
-#            search_term <- unlist(search_term, recursive = FALSE)
-        ret <- paste0('filters=', curl::curl_escape(jsonlite::toJSON(search_term)))
+        searchTerm <- Reduce(.project_filter_loop, query, init = list())
+        ret <- paste0('filters=', curl::curl_escape(jsonlite::toJSON(searchTerm)))
         project@query <- query
-        project@search_term <- search_term
-        project@current_filter <- ret
+        project@searchTerm <- searchTerm
+        project@currentFilter <- ret
         .projectGet(project, ret)
     }
 }
 
-#' Filter entries by position or name
+#' Select columns to display upon showing the object
 #'
-#' @description This function works differently from other usages of select.
-#'  This function allows the user to filter entries based on position or name.
-#'  This function creates a filter targeting the entryId.
+#' @description An HCAExplorer object is intitated with certain default columns
+#'  being displayed upon showing the object. This method allows a user to
+#'  display columns other than the default columns when displaying the object.
 #'
-#' @param .data An HCAObject to filter
-#' @param ... Unused argument
-#' @param projects numeric or character. Either the positions in the output show
-#'  method of the HCAExplorer object or the entries' names.
+#' @param .data An HCAObject to filter.
+#' @param ... Columns to be displayed.
 #'
 #' @return An HCAExplorer object with the applied filter.
 #'
 #' @examples
-#'  hca <- HCAExplorer()
-#'  hca
-#'  hca %>% select(projects = c(1, 2))
+#'  ## Intiate an HCAExplorer object
+#'  x <- HCAExplorer()
+#'  x
+#'
+#'  ## Use the results() method to display which columns are present.
+#'  results(x)
+#'
+#'  ## Select the 'projects.projectTitle' and 'samples.organ' columns.
+#'  x <- x %>% select('projects.projectTitle', 'samples.organ')
+#'  x
+#'
+#'  ## Use resetSelect() to return to the original selection
+#'  x <- resetSelect(x)
+#'  x
+#'
+#' @seealso [HCAExplorer()], [resetSelect()]
 #'
 #' @importFrom dplyr select
 #' @importFrom tidygraph %>%
 #' @export
-select.HCAExplorer <- function(.data, ..., projects)
+select.HCAExplorer <- function(.data, ...)
 {
-    hca <- .data
-    res <- hca@results
-    if (is.character(projects)) {
-        ids <- which(res[['projects.projectTitle']] == projects)
-    }
-    ids <- res[projects,]$entryId
-    hca %>% filter(projectId == ids)
+    .data <- hca
+    selected <- unlist(list(...))
+    hca@selected <- intersect(hca@selected, selected)
+    hca
 }
 
 .LOG_OP_REG_PROJECT <- list()
 .LOG_OP_REG_PROJECT$`==` <- .binary_op_project("==")
 .LOG_OP_REG_PROJECT$`%in%` <- .binary_op_project("==")
 .LOG_OP_REG_PROJECT$`&` <- .combine_op_project("&")
-
-`%startsWith%` <- function(e1, e2){}
-`%endsWith%` <- function(e1, e2){}
-`%contains%` <- function(e1, e2){}
 

@@ -12,7 +12,7 @@
 .projectGet <- function(project, filter, per_page=15)
 {
     url <- project@url
-    project@per_page <- per_page
+    project@perPage <- per_page
     project_url <- paste0(url, '/repository/projects?', filter, '&size=', per_page, '&sort=projectTitle&order=asc')
     project_res <- httr::GET(project_url)
     project <- .project_content(project, project_res)
@@ -29,14 +29,18 @@
     project
 }
 
-.nextResults_HCAExplorer <- function(hca)
+.nextResults_HCAExplorer <- function(x)
 {
-    url <- hca@url
-    url <- paste0(url, '/repository/projects?', hca@current_filter, '&size=', hca@per_page,
-        '&sort=projectTitle&order=asc&search_after=', hca@search_after,
-        '&search_after_uid=', hca@search_after_uid)
+    url <- x@url
+    page <- x@currentPage + 1
+    url <- paste0(url, '/repository/projects?', x@currentFilter, '&size=', x@perPage,
+        '&sort=projectTitle&order=asc&search_after=', x@searchAfter,
+        '&search_after_uid=', x@searchAfterUid)
     res <- httr::GET(url)
-    project <- .project_content(hca, res)
+    project <- .project_content(x, res)
+    if (page > x@totalPages)
+        page <- 1
+    project@currentPage <- page
     project
 }
 
@@ -44,7 +48,7 @@
 #'
 #' @description Fetch the next set of entries from a HCAExplorer Object
 #'
-#' @param hca An HCAExplorer object
+#' @param x An HCAExplorer object
 #'
 #' @return A HCAExplorer object that displays the next results
 #'
@@ -56,9 +60,9 @@
 #' 
 #' @examples
 #'
-#' hca <- HCAExplorer()
-#' hca <- hca %>% nextResults
-#' hca
+#' x <- HCAExplorer()
+#' x <- x %>% nextResults
+#' x
 #'
 #' @export
 setMethod("nextResults", "HCAExplorer", .nextResults_HCAExplorer)

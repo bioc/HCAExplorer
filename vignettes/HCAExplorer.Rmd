@@ -103,7 +103,7 @@ to users. The output also displays the url of the instance of the HCA digest
 being used, the current query, relevant information about the quantity of data
 being displayed, and finally the table of projects.
 
-By default, 15 bundles per page will be displayed in the result and the
+By default, 15 entries per page will be displayed in the result and the
 default url to the HCA DCP will be used. These two values can be changed in
 the constructor or later on using methods.
 
@@ -119,7 +119,7 @@ Upon displaying the object, multiple fields can be seen:
 - The class: `HCAExplorer`
 - The azul-backend address that is currently being used.
 - The current query.
-- The projects being shown and whether a `link` to more results is availiable.
+- The projects being shown and whether a `link` to more results is available.
 - The number of projects being shown per_page.
 - The results `tibble` of the query. (This table is abbreviated to show only
   columns that we determined are most useful to the user.)
@@ -130,21 +130,39 @@ The results `tibble` can be obtained using the `results()` method.
 results(hca)
 ```
 
-To toggle whether prjects, samples, or file are being displayed in the `tibble`,
-the `activate()` method can be used to choose which to display.
+There are various columns that can be displayed in an HCAExplorer object. By
+default, only a few columns are shown. We can change which columns are shown
+by using `select`. For example, the following will only show
+`projects.projectTitle` and `samples.organ` columns when the object as shown.
+
+```{r select}
+hca <- hca %>% select('projects.projectTitle', 'samples.organ')
+hca
+```
+
+The original selection can be restored with `resetSelect()`
+
+```{r resetSelect}
+hca <- resetSelect(hca)
+hca
+```
+
+To toggle whether projects, samples, or file are being displayed in the
+`tibble`, the `activate()` method can be used to choose which to display.
 
 ```{r activate}
-## The HCAExplorer object is activated here by 'files'
+## The HCAExplorer object is activated here by 'samples'
 hca <- hca %>% activate('samples')
 hca
 
-## Revert back to showing bundles with 'bundles'
+## Revert back to showing projects with 'projects'
 hca <- hca %>% activate('projects')
 hca
 ```
 
-Since there are more projects in the HCA than can be shown, if `link` is
-`True`, the next set of bundles can be obtained using the `nextResults` method.
+Looking at the bottom of the output, it can be that there are more pages of
+results to be shown. The next set of entries can be obtained using the
+`nextResults` method.
 
 ```{r nextResults}
 hca <- nextResults(hca)
@@ -162,7 +180,7 @@ to query upon. To do this, use the `fields()` method.
 
 ```{r fields}
 hca <- HCAExplorer()
-hca %>% fields
+fields(hca)
 ```
 This function return all possible fields that can be queried upon. We can now
 see that their is a field named "organ". Since, we are looking at what
@@ -170,7 +188,7 @@ values are avaiable for querying on organs, we can now use the `values()`
 method to do just that.
 
 ```{r valuess}
-hca %>% values('organ')
+values(hca, 'organ')
 ```
 
 We can now see all possible values of 'organ' across all project as well as
@@ -197,12 +215,12 @@ hca <- hca %>% filter(organ %in% c('blood', 'brain'))
 hca
 ```
 
-Suppose we also wish to search also search for results based on the disease.
+Suppose we also wish to also search for results based on the disease.
 We already know a "disease" field exists from our `field()` function. Now we
 can see what disease values are present in our current results.
 
 ```{r second_values}
-hca2 %>% values('disease')
+values(hca, 'disease')
 ```
 These are the possible values only for the results of our previous search.
 Now suppose we would like to search for project only that have samples with no
@@ -214,22 +232,24 @@ reset our search. `undoQuery()` can step back one or many queries.
 
 ```{r multiFilter}
 hca <- hca %>% filter(disease == 'normal')
-hca <- hca %>% undoQuery(n = 2L)
+hca <- undoQuery(hca, n = 2L)
+
 hca <- hca %>% filter(organ %in% c('Brain', 'brain'), disease == 'normal')
-hca <- hca %>% resetQuery
+hca <- resetQuery(hca)
+
 hca <- hca %>% filter(organ %in% c('Brain', 'brain') & disease == 'normal')
 hca
 ```
 
-We can refine out search further by using the `select()` method to only include
-a few results. This works differently than `select()` in other tidyverse
-packages. Here, `select()` can be used to select paricular rows by either 
-index or project name. These selections are added to out search as a query
-against the "projectId". Here we take the first two results from our
+We can refine out search further by using subsetting to only include
+a few results. Here, the `[` symbol can be used to select paricular rows by
+either index or project name. These selections are added to our search as a
+query against the "projectId". Here we take the first two results from our
 HCAExplorer object.
 
-```{r select}
-hca <- hca %>% select(projects=c(1, 2))
+```{r subsetting}
+hca <- hca[1:2,]
+hca
 ```
 
 ## Obtaining manifest files from the HCAExplorer
@@ -239,7 +259,7 @@ selected projects. First, we must find which possible file formats are
 available for download. To do this, we use the `getManifestFileFormats()`.
 
 ```{r getManifestFileFormats}
-formats <- hca %>% getManifestFileFormats
+formats <- getManifestFileFormats(hca)
 formats
 ```
 
@@ -247,8 +267,18 @@ Now that we have the possible file formats, we can download the manifest
 as a `tibble`. To do this, we use the `getManifest()` method.
 
 ```{r getManifest}
-manifest <- hca %>% getManifest(fileFormat = formats[1])
+manifest <- getManifest(hca, fileFormat = formats[1])
 manifest
+```
+
+We can now download our expression matrices using the `bundle_uuid` column.
+Use the closely related `HCAMatrixBrowser` package to download the expression
+matrices as a `LoomExperiment` object.
+
+```{r download_matrices, eval=FALSE}
+library(HCAMatrixBrowser)
+uuids <- manifest$bundle_uuid
+lex <- HCAMatrixBrowser::loadHCAMatrix(uuids)
 ```
 
 ```{r sessionInfo}

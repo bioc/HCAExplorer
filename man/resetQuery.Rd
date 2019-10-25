@@ -6,10 +6,10 @@
 \alias{resetQuery,HCAExplorer-method}
 \title{Reset all queries performed on an object}
 \usage{
-\S4method{resetQuery}{HCAExplorer}(hca)
+\S4method{resetQuery}{HCAExplorer}(x)
 }
 \arguments{
-\item{hca}{An HCAExplorer object}
+\item{x}{An HCAExplorer object}
 }
 \value{
 An HCAExplorer object with the changes applied to it.
@@ -19,9 +19,30 @@ Reset all queries performed on an HCAExplorer
  object then return the result.
 }
 \examples{
- hca <- HCAExplorer()
- hca <- hca \%>\% filter(organ == 'blood')
- hca <- hca \%>\% select(projects = c(1, 2))
- hca \%>\% resetQuery
+ ## Initiate an HCAExplorer Object
+ x <- HCAExplorer()
 
+ ## First we want to perform a search for certain organs.
+ ## Display possible fields looking for organs.
+ fields(x)
+ ## organs can be queried with "organ".
+ ## What values can the field "organ" have?
+ values(x, "organ")
+
+ ## Construct a query looking for projects that involve brain.
+ x <- x \%>\% filter(organ == brain)
+ x
+
+ ## Now select the first two projects by row.
+ x <- x[1:2,]
+ x
+
+ ## Finally we can remove the previous two queries to get the original empty
+ ## search.
+ x <- resetQuery(x)
+ x
+
+}
+\seealso{
+[HCAExplorer()], [undoQuery()]
 }

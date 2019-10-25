@@ -24,13 +24,36 @@ Given some amount of fields and values associated with them,
  terms to the query that is ultimately performed.
 }
 \examples{
- hca <- HCAExplorer()
- hca \%>\% fields
- hca \%>\% values('organ')
- hca \%>\% values('disease')
- ## Perform query (organ is 'blood' OR 'brain') AND disease is 'normal'.
- hca \%>\% filter(organ == c('blood', 'brain') & disease == 'normal')
- ## Also
- hca \%>\% filter(organ == c('blood', 'brain'), disease == 'normal')
+ ## Initiate an HCAExplorer Object
+ x <- HCAExplorer()
 
+ ## First we want to perform a search for certain organs.
+ ## Display possible fields looking for organs.
+ fields(x)
+ ## organs can be queried with "organ".
+ ## What values can the field "organ" have?
+ values(x, "organ")
+
+ ## Construct a query looking for projects that involve blood or brain.
+ y <- x \%>\% filter(organ \%in\% c('blood', 'brain'))
+ y
+
+ ## Now suppose one would also like to find projects that have a certain
+ ## disease. What field corresponds to disease?
+ fields(y)
+ ## The "disease" field looks right.
+ ## What possible disease values can be queried upon?
+ values(y, "disease")
+
+ ## Add a query for a 'normal' diease state to our search.
+ y <- y \%>\% filter(disease == 'normal')
+ y
+
+ ## This entire query can also be performed at once in several ways.
+ x \%>\% filter(organ == c('blood', 'brain') & disease == 'normal')
+ x \%>\% filter(organ == c('blood', 'brain'), disease == 'normal')
+
+}
+\seealso{
+[HCAExplorer()]
 }

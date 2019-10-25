@@ -6,21 +6,39 @@
 \alias{viewProjects,HCAExplorer-method}
 \title{View all metadata about a selection of projects}
 \usage{
-\S4method{viewProjects}{HCAExplorer}(hca)
+\S4method{viewProjects}{HCAExplorer}(x)
 }
 \arguments{
-\item{hca}{An HCAExplorer object}
+\item{x}{An HCAExplorer object}
 }
 \value{
-A list of all metadata in the selected entries
+A list of all metadata in the selected entries. This list will
+ contain mulitple lists representing the metadata.
 }
 \description{
 Returns a list of all the metadata from the current selection
- of entries in the HCAExplorer object.
+ of entries in the HCAExplorer object as a projectView object. This method is
+ is meant to return a clear and useful represntation of the metadata of a
+ selection of projects.
 }
 \examples{
- hca <- HCAExplorer()
- view <- hca \%>\% viewProjects()
+ ## Initiate an HCAExplorer object.
+ x <- HCAExplorer()
+ x
+
+ ## Use viewProjects to show all metadata information relating to a project.
+ view <- viewProjects(x)
  view
 
+ ## Subset the data to obtain the first two rows.
+ x <- x[1:2,]
+ x
+
+ ## Fewer projects have there metadata shown due to our previous subset.
+ view <- viewProjects(x)
+ view
+
+}
+\seealso{
+[HCAExplorer()][projectView()]
 }

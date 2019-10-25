@@ -16,3 +16,10 @@ outputs a text represntation of the object
 \description{
 Show HCAExplorer
 }
+\examples{
+ ## Initiate an HCAExplorer object.
+ x <- HCAExplorer()
+ ## Invoke show() by simply displaying the object.
+ x
+
+}
