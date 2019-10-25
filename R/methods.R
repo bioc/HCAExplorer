@@ -444,8 +444,9 @@ setMethod('resetSelect', 'HCAExplorer', .resetSelect)
 #' @param x An HCAExplorer object.
 #' @param i Either a numeric vector indicating which rows to choose or a
 #'  character vector of project titles indicating which projects to choose.
-#' @param j Unused Argument.
-#' @param ... Unused Argument.
+#' @param j Unused argument.
+#' @param ... Unused argument.
+#' @param drop Unused argument.
 #'
 #' @return An HCAExplorer object with the applied subset.
 #'

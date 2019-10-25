@@ -14,9 +14,11 @@
 \item{i}{Either a numeric vector indicating which rows to choose or a
 character vector of project titles indicating which projects to choose.}
 
-\item{j}{Unused Argument.}
+\item{j}{Unused argument.}
 
-\item{...}{Unused Argument.}
+\item{...}{Unused argument.}
+
+\item{drop}{Unused argument.}
 }
 \value{
 An HCAExplorer object with the applied subset.
@@ -28,7 +30,7 @@ Allows subsetting an HCAExplorer object by row number or
 }
 \examples{
  ## Initiate an HCAExplorer Object.
- x <- HCAExplorer
+ x <- HCAExplorer()
  ## View object to decide which projects to choose.
  x
  ## Decide to select projects 1, 2, 3, and 7

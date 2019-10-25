@@ -22,7 +22,7 @@ This function will reset the selected slot of an HCAExplorer
 \examples{
  
  ## Initiate an HCAExplorer Object.
- x <- HCAExplorer
+ x <- HCAExplorer()
  ## View object to decide which colums to select.
  x
 
