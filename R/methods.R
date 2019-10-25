@@ -402,7 +402,7 @@ setMethod('undoQuery', 'HCAExplorer', .undo_query)
 #'
 #' @examples  
 #'  ## Initiate an HCAExplorer Object.
-#'  x <- HCAExplorer
+#'  x <- HCAExplorer()
 #'  ## View object to decide which colums to select.
 #'  x
 #'
@@ -451,7 +451,7 @@ setMethod('resetSelect', 'HCAExplorer', .resetSelect)
 #'
 #' @examples
 #'  ## Initiate an HCAExplorer Object.
-#'  x <- HCAExplorer
+#'  x <- HCAExplorer()
 #'  ## View object to decide which projects to choose.
 #'  x
 #'  ## Decide to select projects 1, 2, 3, and 7
