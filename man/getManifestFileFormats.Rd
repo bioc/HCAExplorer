@@ -35,5 +35,6 @@ Show all possible manifest file formats for the
 
 }
 \seealso{
-[HCAExplorer()], [getManifest()]
+\code{\link{HCAExplorer}} for the HCAExplorer class
+ \code{\link{getManifest}} for how to obtain the manifest file.
 }

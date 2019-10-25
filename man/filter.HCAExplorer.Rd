@@ -56,4 +56,6 @@ Given some amount of fields and values associated with them,
 }
 \seealso{
 [HCAExplorer()]
+
+\code{\link{HCAExplorer}} for the HCAExplorer class.
 }

@@ -40,5 +40,7 @@ Returns a list of all the metadata from the current selection
 
 }
 \seealso{
+\code{\link{HCAExplorer}} for the HCAExplorer class.
+
 [HCAExplorer()][projectView()]
 }

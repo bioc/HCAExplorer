@@ -42,5 +42,7 @@ Obtain metadata infromation from an HCAExplorer object.
 
 }
 \seealso{
-[HCAExplorer()], [getManifestFileFormats()]
+\code{\link{HCAExplorer}} for the HCAExplorer class,
+ \code{\link{getManifestFileFormats}} for how to obtain file formats that can
+ be used as arguments in this function.
 }

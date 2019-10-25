@@ -10,7 +10,7 @@
 \arguments{
 \item{x}{An HCAExplorer Object.}
 
-\item{fields}{A character vector of fields to display avaiable values for.}
+\item{fields}{A character vector of fields to display available values for.}
 
 \item{...}{Unused arguments.}
 }
@@ -34,5 +34,6 @@ values(x, 'organ')
 
 }
 \seealso{
-[HCAExplorer()] [fields()]
+\code{\link{HCAExplorer}} for the HCAExplorer class,
+ \code{\link{fields}} for how how to search for fields in an HCAExplorer object.
 }

@@ -41,5 +41,5 @@ The HCAExplorer can display its results in a variety of ways.
 
 }
 \seealso{
-[HCAExplorer()]
+\code{\link{HCAExplorer}} for the HCAExplorer class.
 }

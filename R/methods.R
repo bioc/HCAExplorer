@@ -29,7 +29,8 @@
 #' @name results
 #' @aliases results,HCAExplorer-method
 #' @docType methods
-#' @seealso [HCAExplorer()] [tibble()]
+#' @seealso
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class.
 #'
 #' @importFrom dplyr distinct
 #' @importFrom httr GET content
@@ -99,6 +100,9 @@ function(x)
 #'  view <- viewProjects(x)
 #'  view
 #'
+#' @seealso
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class.
+#'
 #' @name viewProjects
 #' @aliases viewProjects,HCAExplorer-method
 #' @docType methods
@@ -156,7 +160,10 @@ setMethod('viewProjects', 'HCAExplorer', .viewProjects)
 #' @name getManifestFileFormats
 #' @aliases getManifestFileFormats,HCAExplorer-method
 #' @docType methods
-#' @seealso [HCAExplorer()], [getManifest()]
+#' @seealso
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class
+#'  \code{\link{getManifest}} for how to obtain the manifest file.
+#'
 #'
 #' @export
 setMethod('getManifestFileFormats', 'HCAExplorer', .getManifestFileFormats)
@@ -219,7 +226,10 @@ setMethod('getManifestFileFormats', 'HCAExplorer', .getManifestFileFormats)
 #' @name getManifest
 #' @aliases getManifest,HCAExplorer-method
 #' @docType methods
-#' @seealso [HCAExplorer()], [getManifestFileFormats()]
+#' @seealso
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class,
+#'  \code{\link{getManifestFileFormats}} for how to obtain file formats that can
+#'  be used as arguments in this function.
 #'
 #' @importFrom httr timeout
 #' @export
@@ -254,9 +264,6 @@ tidygraph::activate
 #'
 #' @return An HCAExplorer object with medified activation.
 #'
-#' @seealso [HCAExplorer()]
-#' @method activate HCAExplorer
-#'
 #' @examples
 #'  ## Initiate an HCAExplorer object.
 #'  x <- HCAExplorer()
@@ -275,6 +282,10 @@ tidygraph::activate
 #'  ## displayed.
 #'  x <- activate(x, 'projects')
 #'  x
+#'
+#' @method activate HCAExplorer
+#' @seealso
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class.
 #'
 #' @export
 activate.HCAExplorer <- .activate.HCAExplorer
@@ -323,7 +334,9 @@ function(x)
 #' @name resetQuery
 #' @aliases resetQuery,HCAExplorer-method
 #' @docType methods
-#' @seealso [HCAExplorer()], [undoQuery()]
+#' @seealso
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class,
+#'  \code{\link{undoQuery}} for how to undo some queries.
 #'
 #' @importFrom rlang quos
 #' @export
@@ -379,7 +392,9 @@ function(x, n = 1L)
 #' @name undoQuery
 #' @aliases undoQuery,HCAExplorer-method
 #' @docType methods
-#' @seealso [HCAExplorer()], [resetQuery()]
+#' @seealso
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class,
+#'  \code{\link{resetQuery}} for reseting the entire query.
 #'
 #' @export
 setMethod('undoQuery', 'HCAExplorer', .undo_query)
@@ -416,7 +431,9 @@ setMethod('undoQuery', 'HCAExplorer', .undo_query)
 #' @name resetSelect
 #' @aliases resetSelect,HCAExplorer-method
 #' @docType methods
-#' @seealso [HCAExplorer()], select()]
+#' @seealso
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class,
+#'  \code{\link{select}} for how to make the initial selection.
 #'
 #' @export
 setMethod('resetSelect', 'HCAExplorer', .resetSelect)
@@ -460,7 +477,9 @@ setMethod('resetSelect', 'HCAExplorer', .resetSelect)
 #' 
 #' @aliases `[`,HCAExplorer-method
 #' @docType methods
-#' @seealso [HCAExplorer()], [filter()]
+#' @seealso
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class,
+#'  \code{\link{filter}} for how to performm a query on an HCAExplorer object.
 #'
 #' @export
 setMethod('[', c('HCAExplorer', 'ANY', 'ANY'), .subset.HCAExplorer)
@@ -497,6 +516,9 @@ setMethod('[', c('HCAExplorer', 'ANY', 'ANY'), .subset.HCAExplorer)
 #'  x <- HCAExplorer()
 #'  ## Invoke show() by simply displaying the object.
 #'  x
+#'
+#' @seealso
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class.
 #'
 #' @importFrom methods show
 #' @export

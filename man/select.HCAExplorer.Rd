@@ -37,5 +37,6 @@ An HCAExplorer object is intitated with certain default columns
 
 }
 \seealso{
-[HCAExplorer()], [resetSelect()]
+\code{\link{HCAExplorer}} for the HCAExplorer class,
+ \code{\link{resetSelect}} for how to reset the selection applied to an HCAExplorer object.
 }

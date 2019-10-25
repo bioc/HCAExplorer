@@ -23,3 +23,6 @@ Show HCAExplorer
  x
 
 }
+\seealso{
+\code{\link{HCAExplorer}} for the HCAExplorer class.
+}

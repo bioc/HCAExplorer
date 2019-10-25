@@ -59,10 +59,16 @@
 #' @docType methods
 #' 
 #' @examples
-#'
+#' ## Intitate an HCAExplorer object.
 #' x <- HCAExplorer()
-#' x <- x %>% nextResults
 #' x
+#' 
+#' ## View the next set of results in the HCAExplorer object.
+#' x <- nextResults(x)
+#' x
+#'
+#' @seealso
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class,
 #'
 #' @export
 setMethod("nextResults", "HCAExplorer", .nextResults_HCAExplorer)

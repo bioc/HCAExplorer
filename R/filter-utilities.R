@@ -4,6 +4,10 @@
     names(x@terms)
 }
 
+#' @importFrom vctrs fields
+#' @export
+vctrs::fields
+
 #' List supported fields of an HCAExplorer object
 #'
 #' @description This function is used to discover possible fields that can be
@@ -13,20 +17,22 @@
 #'
 #' @return A tibble indicating fields that can be queried upon.
 #' 
-#' @name fields
-#' @seealso [HCAExplorer()] [values()]
+#' @aliases fields,HCAExplorer-method
+#' @seealso
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class,
+#'  \code{\link{values}} for how to obtain possible values of a field.
 #'
 #' @examples
 #' ## Intiate an HCAExplorer object.
 #' x <- HCAExplorer()
 #'
-#' ## Find which firelds can be queried upon.
+#' ## Find which fields can be queried upon.
 #' fields(x)
 #'
 #' @importFrom tidygraph as_tibble
 #' @importFrom utils head
 #' @export
-fields <- .fields
+setMethod('fields', 'HCAExplorer', .fields)
 
 .project.values <- function(x, fields)
 {
@@ -48,12 +54,14 @@ fields <- .fields
 #'  field.
 #'
 #' @param x An HCAExplorer Object.
-#' @param fields A character vector of fields to display avaiable values for.
+#' @param fields A character vector of fields to display available values for.
 #' @param ... Unused arguments.
 #'
 #' @return a character vector of possible values for a filter.
 #'
-#' @seealso [HCAExplorer()] [fields()]
+#' @seealso 
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class,
+#'  \code{\link{fields}} for how how to search for fields in an HCAExplorer object.
 #'
 #' @examples
 #' ## Intiate an HCAExplorer object.
@@ -167,6 +175,9 @@ setMethod("values", "HCAExplorer", .project.values)
 #'  x %>% filter(organ == c('blood', 'brain') & disease == 'normal')
 #'  x %>% filter(organ == c('blood', 'brain'), disease == 'normal')
 #'
+#' @seealso
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class.
+#'
 #' @importFrom curl curl_escape
 #' @importFrom dplyr filter
 #' @importFrom jsonlite toJSON
@@ -218,7 +229,9 @@ filter.HCAExplorer <- function(.data, ..., .preserve)
 #'  x <- resetSelect(x)
 #'  x
 #'
-#' @seealso [HCAExplorer()], [resetSelect()]
+#' @seealso
+#'  \code{\link{HCAExplorer}} for the HCAExplorer class,
+#'  \code{\link{resetSelect}} for how to reset the selection applied to an HCAExplorer object.
 #'
 #' @importFrom dplyr select
 #' @importFrom tidygraph %>%

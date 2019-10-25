@@ -36,5 +36,6 @@ This function will reset the selected slot of an HCAExplorer
 
 }
 \seealso{
-[HCAExplorer()], select()]
+\code{\link{HCAExplorer}} for the HCAExplorer class,
+ \code{\link{select}} for how to make the initial selection.
 }

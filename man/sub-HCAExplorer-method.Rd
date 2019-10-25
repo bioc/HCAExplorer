@@ -39,5 +39,6 @@ Allows subsetting an HCAExplorer object by row number or
 
 }
 \seealso{
-[HCAExplorer()], [filter()]
+\code{\link{HCAExplorer}} for the HCAExplorer class,
+ \code{\link{filter}} for how to performm a query on an HCAExplorer object.
 }

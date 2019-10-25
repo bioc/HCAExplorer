@@ -32,5 +32,5 @@ Returns a tibble either showing bundles or files based on whichever is
 
 }
 \seealso{
-[HCAExplorer()] [tibble()]
+\code{\link{HCAExplorer}} for the HCAExplorer class.
 }

@@ -44,5 +44,6 @@ Reset all queries performed on an HCAExplorer
 
 }
 \seealso{
-[HCAExplorer()], [undoQuery()]
+\code{\link{HCAExplorer}} for the HCAExplorer class,
+ \code{\link{undoQuery}} for how to undo some queries.
 }
