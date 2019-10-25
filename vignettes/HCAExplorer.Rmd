@@ -271,16 +271,6 @@ manifest <- getManifest(hca, fileFormat = formats[1])
 manifest
 ```
 
-We can now download our expression matrices using the `bundle_uuid` column.
-Use the closely related `HCAMatrixBrowser` package to download the expression
-matrices as a `LoomExperiment` object.
-
-```{r download_matrices, eval=FALSE}
-library(HCAMatrixBrowser)
-uuids <- manifest$bundle_uuid
-lex <- HCAMatrixBrowser::loadHCAMatrix(uuids)
-```
-
 ```{r sessionInfo}
 sessionInfo()
 ```

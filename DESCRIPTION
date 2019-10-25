@@ -1,7 +1,7 @@
 Package: HCAExplorer
 Type: Package
 Title: Browse the Human Cell Atlas data portal
-Version: 0.99.6
+Version: 0.99.7
 Authors@R: c(
     person(
         "Daniel", "Van Twisk",
@@ -35,7 +35,6 @@ Imports: S4Vectors,
          utils
 Suggests: 
     BiocStyle,
-    HCAMatrixBrowser,
     knitr,
     rmarkdown,
     testthat (>= 2.1.0)
