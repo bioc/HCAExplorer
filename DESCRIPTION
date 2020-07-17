@@ -1,7 +1,7 @@
 Package: HCAExplorer
 Type: Package
 Title: Browse the Human Cell Atlas data portal
-Version: 1.3.0
+Version: 1.3.1
 Authors@R: c(
     person(
         "Daniel", "Van Twisk",
@@ -33,7 +33,8 @@ Imports: S4Vectors,
          rlang,
          tibble,
          tidygraph,
-         utils
+         utils,
+         xml2
 Suggests: 
     BiocStyle,
     knitr,
@@ -43,7 +44,7 @@ License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
 URL: https://github.com/Bioconductor/HCABrowser
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 biocViews: DataImport, Sequencing
 BugReports:
     https://github.com/Bioconductor/HCABrowser/issues

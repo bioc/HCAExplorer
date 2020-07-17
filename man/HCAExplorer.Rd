@@ -4,8 +4,10 @@
 \alias{HCAExplorer}
 \title{The Project Browser Class}
 \usage{
-HCAExplorer(url = "https://service.explore.data.humancellatlas.org",
-  per_page = 15)
+HCAExplorer(
+  url = "https://service.explore.data.humancellatlas.org",
+  per_page = 15
+)
 }
 \arguments{
 \item{url}{character(1) The url of the Human Cell Atlas Backend to access.}

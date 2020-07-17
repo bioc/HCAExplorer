@@ -4,8 +4,7 @@
 \alias{activate.HCAExplorer}
 \title{Activate projects, samples, or files to display in the HCAExplorer Object}
 \usage{
-\method{activate}{HCAExplorer}(.data, what = c("projects", "samples",
-  "files"))
+\method{activate}{HCAExplorer}(.data, what = c("projects", "samples", "files"))
 }
 \arguments{
 \item{.data}{An HCAExplorer object}

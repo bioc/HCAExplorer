@@ -55,7 +55,6 @@ setMethod('fields', 'HCAExplorer', .fields)
 #'
 #' @param x An HCAExplorer Object.
 #' @param fields A character vector of fields to display available values for.
-#' @param ... Unused arguments.
 #'
 #' @return a character vector of possible values for a filter.
 #'
