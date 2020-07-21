@@ -21,6 +21,8 @@
         terms <- list()
     project@terms <- terms
     upfront <- do.call(rbind.fill, upfront)
+    dd <- duplicated(names(upfront))
+    upfront <- upfront[!dd]
     project@results <- as_tibble(upfront)
     project@searchAfter <- curl::curl_escape(results[[2]][["search_after"]])
     project@searchAfterUid <- curl::curl_escape(results[[2]][["search_after_uid"]])

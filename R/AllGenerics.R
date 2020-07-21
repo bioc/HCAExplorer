@@ -7,4 +7,6 @@ setGeneric('viewProjects', function(x, ...) standardGeneric('viewProjects'))
 setGeneric('getManifest', function(x, ...) standardGeneric('getManifest'))
 setGeneric('getManifestFileFormats', function(x, ...) standardGeneric('getManifestFileFormats'))
 setGeneric('results', function(x, ...) standardGeneric('results'))
+setGeneric('downloadExpressionMatrices', function(x, ...) standardGeneric('downloadExpressionMatrices'))
+setGeneric('checkExpressionMatricesAvailability', function(x, ...) standardGeneric('checkExpressionMatricesAvailability'))
 

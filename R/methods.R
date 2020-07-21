@@ -193,6 +193,104 @@ setMethod('getManifestFileFormats', 'HCAExplorer', .getManifestFileFormats)
     httr::content(res)
 }
 
+.checkExpressionMatricesAvailability <- function(x, format=c("loom", "csv", "mtx"), organism)
+{
+    browser()
+    format <- match.arg(format)
+    if(format != "loom")
+        format <- paste0(format, ".zip")
+
+    ## Check if resources already saved to BiocFileCache
+    res <- x@results
+    ids <- res$entryId
+    titles <- res$projects.projectTitle
+    organisms <- res$donorOrganisms.genusSpecies
+    useOrganism <- !missing(organism)
+    if (useOrganism)
+        organisms <- organism
+
+    statuses <- vapply(seq_along(ids), function(id) {
+        if(useOrganism)
+            orgs <- organism
+        else
+            orgs <- strsplit(organisms[id], ", ")
+        status <- vapply(orgs[[1]], function(org) {
+            org <- tolower(org)
+            org <- gsub(" ", "_", org)
+            name <- paste0(ids[id],".", org, ".", format)
+            url <- paste0("https://data.humancellatlas.org/project-assets/project-matrices/", name)
+            ret <- httr::HEAD(url)
+            ret$status_code != 404L
+         }, logical(1))
+         any(status)
+    }, logical(1))
+
+    tibble(projects.projectTitle = titles, donorOrganisms.genusSpecies = organisms, matrix.availiable = statuses)
+}
+
+#' @export
+setMethod("checkExpressionMatricesAvailability", "HCAExplorer", .checkExpressionMatricesAvailability)
+
+#' @importFrom BiocFileCache BiocFileCache bfcquery bfcrpath bfcadd
+#' @importFrom LoomExperiment LoomExperiment import LoomFile
+.downloadExpressionMatrices <- function(x, format = c("loom", "csv", "mtx"), organism,
+                                        useBiocFileCache = TRUE)
+{
+    browser()
+    format <- match.arg(format)
+    if(format != "loom")
+        format <- paste0(format, ".zip")
+
+    ## Check if resources already saved to BiocFileCache
+    res <- x@results
+    ids <- res$entryId
+    titles <- res$projects.projectTitle
+    organisms <- res$donorOrganisms.genusSpecies
+
+    matrices <- list()
+
+    for(id in seq_along(ids)) {
+        if(!missing(organism))
+            orgs <- organism
+        else
+            orgs <- strsplit(organisms[id], ", ")
+        for (org in orgs) {
+            org <- tolower(org)
+            org <- gsub(" ", "_", org)
+            name <- paste0(ids[id],".", org, ".", format)
+            url <- paste0("https://data.humancellatlas.org/project-assets/project-matrices/", name)
+
+            bfc <- BiocFileCache()
+            nrec <- NROW(bfcquery(bfc, name, "rname", exact = TRUE))
+
+            if (nrec == 0L) {
+                ## Check if file exists
+                ret <- httr::HEAD(url)
+                if (ret$status_code == 404L) {
+                    warning("Expression matrix of ", titles[id], " not found.")
+                    continue()
+                } 
+                message("Downloading ", name)
+                dbpath <- bfcadd(bfc, name, fpath = url)
+            }
+            else if (nrec == 1L){
+                dbpath <- bfcrpath(bfc, name)
+            } else {
+                stop(
+                    "\n  'bfc' contains duplicate record names",
+                    "\n      bfccache(): '", bfccache(bfc), "'",
+                    "\n      rname: '", name, "'"
+                )
+            }
+        matrices[[paste(titles[id], name)]] <- LoomExperiment::import(dbpath)
+        }
+    }
+    matrices
+}
+
+#' @export
+setMethod("downloadExpressionMatrices", "HCAExplorer", .downloadExpressionMatrices)
+
 #' Obtain metadata information from an HCAExplorer object
 #'
 #' @description Obtain metadata infromation from an HCAExplorer object.
