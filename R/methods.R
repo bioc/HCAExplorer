@@ -227,11 +227,69 @@ setMethod('getManifestFileFormats', 'HCAExplorer', .getManifestFileFormats)
     tibble(projects.projectTitle = titles, donorOrganisms.genusSpecies = organisms, matrix.availiable = statuses)
 }
 
+#' Download Expression Matrices with HCAExplorer
+#'
+#' @aliases checkExpressionMatricesAvailability downloadExpressionMatrices
+#' 
+#' @description
+#'  Methods used to download expression matrices availiable through the HCA Data
+#'  Portal. The method `checkExpressionMatricesAvaiability` specifies whether
+#'  expression matrices can be downloaded for a project. The method
+#'  `downloadExpressionMatrices` downloads and returns expression matrices in
+#'  a variety of formats.
+#' 
+#' @usage
+#'  checkExpressionMatricesAvailability(x, ...)
+#'  downloadExpressionMatrices(x, ...)
+#'
+#' @param format either "loom", "csv", of "mtx". The default value is "loom".
+#'  Which format the expression matrices should be downloaded as. If "loom", a
+#'  `LoomExperiment` object will be returned. If "csv", a tibble will be
+#'  returned. If "mtx", a `SingleCellExperiment` object will be returned.
+#'
+#' @param organism character(1). Which organism file to download. Usually either
+#'  "Homo sapiens" or "Mus musculus". If not specified, all organism files will
+#'  be included in the download.
+#'
+#' @param useBiocFileCache logical(1). Whether to save file with
+#'  `BiocFileCache`. Defaults to `TRUE`. If `TRUE`, `BiocFileCache` will be used
+#'  to save a persistent copy of the file to the user's computer. This
+#'  persistent copy will be used instead of redownloading the expression
+#'  matrices in subsequent uses. If `FALSE`, the file will be saved to a
+#'  temporary directory and will be removed when the session ends.
+#'
+#' @param x an HCAExplorer object. All project entries in the object will
+#'  attempt to be downloaded. Use subsetting to reduce the projects that are
+#'  to be downloaded.
+#' 
+#' @param ... Additional arguments.
+#'
+#' @return
+#'  For `checkExpressionMatrixAvailability`, returns a tibble.
+#'  For `downloadExpressionMatrices', returns a list of downloaded expression
+#'  matrices in a format specified by the `format` argument.
+#'  
+#' @examples
+#' hca <- HCAExplorer()
+#' checkExpressionMatricesAvailability(hca)
+#' 
+#' hca <- hca[5]
+#' hca <- downloadExpressionMatrices(hca, useBiocFileCache = FALSE)
+#'
+#' @name download-expression-matrices
+#' @author Daniel Van Twisk
+NULL
+
+#' Check Expression Matrix Availability
+#'
+#' @rdname download-expression-matrices
 #' @export
 setMethod("checkExpressionMatricesAvailability", "HCAExplorer", .checkExpressionMatricesAvailability)
 
-#' @importFrom BiocFileCache BiocFileCache bfcquery bfcrpath bfcadd
+#' @importFrom BiocFileCache BiocFileCache bfcquery bfcrpath bfcadd bfccache
 #' @importFrom LoomExperiment LoomExperiment import LoomFile
+#' @importFrom readr read_csv
+#' @importFrom utils download.file unzip
 .downloadExpressionMatrices <- function(x, format = c("loom", "csv", "mtx"), organism,
                                         useBiocFileCache = TRUE)
 {
@@ -258,34 +316,50 @@ setMethod("checkExpressionMatricesAvailability", "HCAExplorer", .checkExpression
             name <- paste0(ids[id],".", org, ".", format)
             url <- paste0("https://data.humancellatlas.org/project-assets/project-matrices/", name)
 
-            bfc <- BiocFileCache()
-            nrec <- NROW(bfcquery(bfc, name, "rname", exact = TRUE))
+            if (useBiocFileCache) {
+                bfc <- BiocFileCache()
+                nrec <- NROW(bfcquery(bfc, name, "rname", exact = TRUE))
 
-            if (nrec == 0L) {
-                ## Check if file exists
-                ret <- httr::HEAD(url)
-                if (ret$status_code == 404L) {
-                    warning("Expression matrix file ", name, " of ", titles[id], " not found.")
-                    next
-                } 
-                message("Downloading ", name)
-                dbpath <- bfcadd(bfc, name, fpath = url)
-            }
-            else if (nrec == 1L){
-                dbpath <- bfcrpath(bfc, name)
+                if (nrec == 0L) {
+                    ## Check if file exists
+                    ret <- httr::HEAD(url)
+                    if (ret$status_code == 404L) {
+                        warning("Expression matrix file ", name, " of ", titles[id], " not found.")
+                        next
+                    } 
+                    message("Downloading ", name)
+                    dbpath <- bfcadd(bfc, name, fpath = url)
+                }
+                else if (nrec == 1L){
+                    dbpath <- bfcrpath(bfc, name)
+                } else {
+                    stop(
+                        "\n  'bfc' contains duplicate record names",
+                        "\n      bfccache(): '", bfccache(bfc), "'",
+                        "\n      rname: '", name, "'"
+                    )
+               }
             } else {
-                stop(
-                    "\n  'bfc' contains duplicate record names",
-                    "\n      bfccache(): '", bfccache(bfc), "'",
-                    "\n      rname: '", name, "'"
-                )
+                dbpath <- tempfile(fileext = paste0(".", format))
+                download.file(url, dbpath)
             }
-        matrices[[paste(titles[id], name)]] <- LoomExperiment::import(dbpath)
+        if (format == "loom")
+            matrices[[paste(titles[id], name)]] <- LoomExperiment::import(dbpath)
+        else if (format == "csv.zip") {
+            files <- utils::unzip(dbpath, exdir = tempfile())
+            message("This may take a while...")
+            matrices[[paste(titles[id], name)]] <- lapply(stats::setNames(files, basename(files)), readr::read_csv)
+        }
+        else if (format == "mtx.zip")
+            matrices[[paste(titles[id], name)]] <- HCAMatrixBrowser:::import_mtxzip(dbpath)
         }
     }
     matrices
 }
 
+#' Download Expression Matrices
+#'
+#' @rdname download-expression-matrices
 #' @export
 setMethod("downloadExpressionMatrices", "HCAExplorer", .downloadExpressionMatrices)
 

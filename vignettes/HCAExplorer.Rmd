@@ -271,6 +271,49 @@ manifest <- getManifest(hca, fileFormat = formats[1])
 manifest
 ```
 
+## Downloading Expression Matrices
+
+HCAExplorer is able to download expression matrices availiable on the HCA
+Data Portal site. These are precomputed matrices and the HCAMatrixBrowser
+package should be used if the user wants to generate their own matrices.
+
+The `checkExpressionMatricesAvailability()` method returns a tibble displaying
+whether the projects in the `HCAExplorer` object are available for download.
+
+```{r checkExpressionMatricesAvailability}
+hca <- HCAExplorer()
+checkExpressionMatricesAvailability(hca, format = "loom")
+```
+
+The `downloadExpressionMatrices()` method downloads the expression matrices
+and returns them as a certain format.
+- If `format` is `"loom"`, a list of `LoomExperiment`s objects will be returned. 
+- If `format` is `"csv"`, a list of `tibble`s objects will be returned. 
+- If `format` is `"mtx"`, a list of `SingleCellExperiment`s objects will be returned.
+
+Some entries may contain multiple `organism`s for download, usually either
+`"Homo sapiens"` or `"Mus musculus"`. If the `organism` argument is not
+specified, all tables will attempt to be downloaded.
+
+By default, expression matrices will be saved using `BiocFileCache` to mantain a
+persistent copy of the file between sessions, as specified by the
+`useBiocFileCache` argument. If `useBiocFileCache = FALSE`, a temporary copy of
+the expression matrices will be saved. Although using BiocFileCache is
+recommeneded, we specify `useBiocFileCache = FALSE` here so that this example
+does not create a persistent copy of the file. 
+
+```{r downloadExpressionMatrix, eval = FALSE}
+## Create HCAExplorer object
+hca <- HCAExplorer()
+
+## Obtain the fifth project by subsetting
+hca <- hca[5]
+
+## Download project's expression matrix file as a LoomExperiment object
+le <- downloadExpressionMatrices(hca, format = "loom", useBiocFileCache = FALSE)
+le
+```
+
 ```{r sessionInfo}
 sessionInfo()
 ```
