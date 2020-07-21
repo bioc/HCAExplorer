@@ -195,7 +195,6 @@ setMethod('getManifestFileFormats', 'HCAExplorer', .getManifestFileFormats)
 
 .checkExpressionMatricesAvailability <- function(x, format=c("loom", "csv", "mtx"), organism)
 {
-    browser()
     format <- match.arg(format)
     if(format != "loom")
         format <- paste0(format, ".zip")
@@ -236,7 +235,6 @@ setMethod("checkExpressionMatricesAvailability", "HCAExplorer", .checkExpression
 .downloadExpressionMatrices <- function(x, format = c("loom", "csv", "mtx"), organism,
                                         useBiocFileCache = TRUE)
 {
-    browser()
     format <- match.arg(format)
     if(format != "loom")
         format <- paste0(format, ".zip")
@@ -267,7 +265,7 @@ setMethod("checkExpressionMatricesAvailability", "HCAExplorer", .checkExpression
                 ## Check if file exists
                 ret <- httr::HEAD(url)
                 if (ret$status_code == 404L) {
-                    warning("Expression matrix of ", titles[id], " not found.")
+                    warning("Expression matrix file ", name, " of ", titles[id], " not found.")
                     next
                 } 
                 message("Downloading ", name)
