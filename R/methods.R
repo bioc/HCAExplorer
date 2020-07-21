@@ -268,7 +268,7 @@ setMethod("checkExpressionMatricesAvailability", "HCAExplorer", .checkExpression
                 ret <- httr::HEAD(url)
                 if (ret$status_code == 404L) {
                     warning("Expression matrix of ", titles[id], " not found.")
-                    continue()
+                    next
                 } 
                 message("Downloading ", name)
                 dbpath <- bfcadd(bfc, name, fpath = url)
