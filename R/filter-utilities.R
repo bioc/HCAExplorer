@@ -39,7 +39,7 @@ setMethod('fields', 'HCAExplorer', .fields)
     term <- x@terms
     field <- term[[fields]]
     field <- unlist(field)
-    field <- head(field, -3)
+    field <- head(field, -2)      ## Remove "total" columns at end
     uu <- matrix(field, nrow = 2)
     uu <- t(uu)
     uu <- as.data.frame(uu)
